@@ -16,6 +16,20 @@ public abstract class Player : IActor, IDrawable {
    protected int _maxHp  = 12;
    protected int _maxStr = 16;
    protected int _turn   = 0;
+
+
+   private List<Item> _inventory = new();
+   public IReadOnlyList<Item> Inventory => _inventory.AsReadOnly();
+
+   public void AddItem(Item item)
+   {
+      _inventory.Add(item);
+   }
+
+   public void AddGold(int amount)
+   {
+      _gold += amount;
+   }
    
    public int Turn => _turn;
 

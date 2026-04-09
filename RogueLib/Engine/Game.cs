@@ -25,7 +25,7 @@ public class Game {
    public Game() {
       _isQuit = false;
    }
-
+   
    public void run() {
       // the game loop
       while (_currentLevel!.IsActive) {

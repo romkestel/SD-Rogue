@@ -36,6 +36,9 @@ public class Level : Scene {
    protected TileSet _discovered; // tiles the player has seen
    protected TileSet _inFov;      // current fov of player
 
+   protected List<Item> _items; 
+   
+   
    public Level(Player p, string map, Game game) {
       if (game == null || p == null || map == null)
          throw new ArgumentNullException("game, player, or map cannot be null");
@@ -44,11 +47,27 @@ public class Level : Scene {
       _player.Pos = new Vector2(4, 12); // random, or at stairs
       _map        = map;
       _game       = _game;
-
+      _items      = new List<Item>();
       initMapTileSets(map);
       updateDiscovered();
       registerCommandsWithScene();
+
+      SpreadGold();
+
+      void SpreadGold()
+      {
+         var rng = new Random();
+         var am = rng.Next(10, 20);
+         for (int i = 0; i < am; i++)
+         {
+            var tile = _floor.ElementAt(rng.Next(_floor.Count));
+            _items.Add(new Gold(tile, rng.Next(2, 61)));
+         }
+      }
+
    }
+   
+   
 
    protected void updateDiscovered() {
       _inFov = fovCalc(_player!.Pos, _senseRadius);
@@ -107,7 +126,16 @@ public class Level : Scene {
 
 // -------------------------------------------------------------------------
 
-   private void drawItems(IRenderWindow disp) { }
+   private void drawItems(IRenderWindow disp)
+   {
+      foreach (var i in _items)
+      {
+         if (_inFov.Contains(i.Pos) || _discovered.Contains(i.Pos))
+         {
+            i.Draw(disp);
+         }
+      }
+   }
 
    private void drawEnemies(IRenderWindow disp) { }
 
@@ -164,11 +192,11 @@ public class Level : Scene {
       RegisterCommand(ConsoleKey.S, "down");
       RegisterCommand(ConsoleKey.J, "down");
 
-      RegisterCommand(ConsoleKey.DownArrow, "left");
+      RegisterCommand(ConsoleKey.LeftArrow, "left");
       RegisterCommand(ConsoleKey.A, "left");
       RegisterCommand(ConsoleKey.H, "left");
 
-      RegisterCommand(ConsoleKey.DownArrow, "right");
+      RegisterCommand(ConsoleKey.RightArrow, "right");
       RegisterCommand(ConsoleKey.D, "right");
       RegisterCommand(ConsoleKey.L, "right");
 
@@ -178,8 +206,23 @@ public class Level : Scene {
 
    public void MovePlayer(Vector2 delta) {
       var newPos = _player!.Pos + delta;
-
+      
       if (_walkables.Contains(newPos)) {
+         var itemToPickUp = _items.FirstOrDefault(i => i.Pos == newPos);
+
+         if (itemToPickUp != null)
+         {
+            if (itemToPickUp is Gold g)
+            {
+               _player.AddGold(g.Amount);
+            }
+            else
+            {
+               _player.AddItem(itemToPickUp);
+            }
+            _items.Remove(itemToPickUp);
+         }
+         
          var oldPos = _player!.Pos;
          _player!.Pos = newPos;
          _walkables.Remove(newPos); // new tile is now occupied
