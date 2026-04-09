@@ -5,8 +5,8 @@ namespace RlGameNS;
 
 public class Weapon : Item
 {
-   public Weapon(Vector2 pos, int damage, char glyph) : base(glyph, pos)
-   {
+   public Weapon(Vector2 pos, int damage, char glyph) : base('T', pos)
+   {       
       Damage = damage;
    }
    

@@ -1,6 +1,8 @@
+using Armor.Levels;
 using RogueLib.Dungeon;
 using RogueLib.Engine;
 using RogueLib.Utilities;
+using System.Formats.Tar;
 using TileSet = System.Collections.Generic.HashSet<RogueLib.Utilities.Vector2>;
 
 namespace RlGameNS;
@@ -23,7 +25,7 @@ namespace RlGameNS;
 public class Level : Scene {
    // ---- level config ---- 
    protected string? _map;
-   protected int     _senseRadius = 4;
+   protected int     _senseRadius = 400;
 
    // --- Tile Sets -----
    // used to keep track of state of tiles on the map
@@ -47,23 +49,51 @@ public class Level : Scene {
       _player.Pos = new Vector2(4, 12); // random, or at stairs
       _map        = map;
       _game       = _game;
-      _items      = new List<Item>();
+      _items      = new List<Item>(); // type of item
       initMapTileSets(map);
       updateDiscovered();
       registerCommandsWithScene();
 
-      SpreadGold();
+        SpreadItem();
 
-      void SpreadGold()
+      void SpreadItem()
       {
          var rng = new Random();
          var am = rng.Next(10, 20);
-         for (int i = 0; i < am; i++)
-         {
-            var tile = _floor.ElementAt(rng.Next(_floor.Count));
-            _items.Add(new Gold(tile, rng.Next(2, 61)));
-         }
-      }
+         var wep = rng.Next(0, 3);
+         var armour = rng.Next(0, 2);
+
+            for (int i = 0; i < am; i++)
+            {
+                var tile = _floor.ElementAt(rng.Next(_floor.Count));
+                _items.Add(new Gold(tile, rng.Next(2, 61)));
+            }
+
+            for (int i = 0; i < wep; i++)
+            {
+                var tile = _floor.ElementAt(rng.Next(_floor.Count));
+                _items.Add(new Weapon(tile, rng.Next(1, 11), 'T'));
+            }
+
+            for (int i = 0; i < armour; i++)
+            {
+                var tile = _floor.ElementAt(rng.Next(_floor.Count));
+                _items.Add(new Armour(tile, rng.Next(1, 11), 'X'));
+            }
+        }
+
+
+        //void SpreadWeapons()
+        //{
+        //    var rng = new Random();
+        //    var am = rng.Next(10, 20);
+        //}
+
+        //void SpreadArmor()
+        //{
+        //    var rng = new Random();
+        //    var am = rng.Next(10, 20);
+        //}
 
    }
    
