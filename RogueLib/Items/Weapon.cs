@@ -1,7 +1,7 @@
 using RogueLib.Dungeon;
 using RogueLib.Utilities;
 
-namespace RlGameNS;
+namespace RogueLib.Items;
 
 public class Weapon : Item
 {

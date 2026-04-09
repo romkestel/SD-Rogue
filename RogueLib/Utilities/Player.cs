@@ -1,5 +1,7 @@
 using RogueLib.Dungeon;
+using RogueLib.Items;
 using RogueLib.Utilities;
+
 
 public abstract class Player : IActor, IDrawable {
    public string       Name { get; set; }
@@ -17,15 +19,8 @@ public abstract class Player : IActor, IDrawable {
    protected int _maxStr = 16;
    protected int _turn   = 0;
 
-
-   private List<Item> _inventory = new();
-   public IReadOnlyList<Item> Inventory => _inventory.AsReadOnly();
-
-   public void AddItem(Item item)
-   {
-      _inventory.Add(item);
-   }
-
+   public Inventory Bag { get; } = new();
+   
    public void AddGold(int amount)
    {
       _gold += amount;

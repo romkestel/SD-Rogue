@@ -1,11 +1,10 @@
-using Armor.Levels;
 using RogueLib.Dungeon;
 using RogueLib.Engine;
+using RogueLib.Items;
 using RogueLib.Utilities;
-using System.Formats.Tar;
 using TileSet = System.Collections.Generic.HashSet<RogueLib.Utilities.Vector2>;
 
-namespace RlGameNS;
+namespace SandBox01.Levels;
 
 // -----------------------------------------------------------------------
 // The Level is the model, all the game world objects live in the model. 
@@ -80,7 +79,7 @@ public class Level : Scene {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
                 _items.Add(new Armour(tile, rng.Next(1, 11), 'X'));
             }
-        }
+      }
 
 
         //void SpreadWeapons()
@@ -248,7 +247,7 @@ public class Level : Scene {
             }
             else
             {
-               _player.AddItem(itemToPickUp);
+               _player.Bag.AddItem(itemToPickUp);
             }
             _items.Remove(itemToPickUp);
          }

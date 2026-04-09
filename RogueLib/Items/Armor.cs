@@ -1,8 +1,7 @@
-﻿
-using RogueLib.Dungeon;
+﻿using RogueLib.Dungeon;
 using RogueLib.Utilities;
 
-namespace Armor.Levels
+namespace RogueLib.Items
 {
     public class Armour : Item
     {

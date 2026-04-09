@@ -1,8 +1,7 @@
-using RogueLib.Engine;
-using RogueLib.Utilities;
+using RogueLib.Dungeon;
 using CommandMap = System.Collections.Generic.Dictionary<System.ConsoleKey, string>;
 
-namespace RogueLib.Dungeon;
+namespace RogueLib.Engine;
 
 public abstract class Scene : ICommandable, IDrawable {
   // scenes must implement these services -------------------------
