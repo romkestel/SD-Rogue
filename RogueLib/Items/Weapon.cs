@@ -3,18 +3,32 @@ using RogueLib.Utilities;
 
 namespace RogueLib.Items;
 
+enum WeaponType
+{
+    Sword = 5,
+    Axe = 7,
+    GreatSword = 10,
+    TwoHandedAxe = 13
+}
 public class Weapon : Item
 {
-   public Weapon(Vector2 pos, int damage, char glyph) : base('T', pos)
+    public string Name;
+    public Weapon(Vector2 pos, int damage) : base('V', pos)
    {       
       Damage = damage;
    }
-   
-   public int Damage { get; set; }
+
+    //public void WeaponType()
+    //{
+    //    Name = type.ToString();
+    //    Damage = (int)type;
+    //}
+
+    public int Damage { get; set; }
 
    public override void Draw(IRenderWindow disp)
    {
-      disp.Draw(Glyph, Pos, ConsoleColor.Gray);
+      disp.Draw(Glyph, Pos, ConsoleColor.Blue);
    }
    
 }

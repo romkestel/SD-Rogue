@@ -56,4 +56,7 @@ public class Game {
       if (_currentLevel!.HasCommand(key.Key))
          _currentLevel!.DoCommand(new Command(_currentLevel!.GetCommand(key.Key)));
    }
+
+
+    
 }
