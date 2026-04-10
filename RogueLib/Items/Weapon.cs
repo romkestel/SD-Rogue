@@ -5,7 +5,7 @@ namespace RogueLib.Items;
 
 public class Weapon : Item
 {
-   public Weapon(Vector2 pos, int damage, char glyph) : base('T', pos)
+   public Weapon(Vector2 pos, int damage, char glyph) : base('T', pos, ConsoleColor.Gray)
    {       
       Damage = damage;
    }
@@ -14,7 +14,7 @@ public class Weapon : Item
 
    public override void Draw(IRenderWindow disp)
    {
-      disp.Draw(Glyph, Pos, ConsoleColor.Gray);
+      disp.Draw(Glyph, Pos, Color);
    }
    
 }

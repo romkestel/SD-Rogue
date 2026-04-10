@@ -18,12 +18,33 @@ public abstract class Player : IActor, IDrawable {
    protected int _maxHp  = 12;
    protected int _maxStr = 16;
    protected int _turn   = 0;
-
-   public Inventory Bag { get; } = new();
    
+   public Inventory Bag { get; } = new();
+
+   public int Hp { get => _hp; }
+   public int MaxHp { get => _maxHp; }
+
    public void AddGold(int amount)
    {
       _gold += amount;
+   }
+   
+   public void Heal(int amount)
+   {
+      _hp += amount;
+      if (_hp > _maxHp)
+      {
+         _hp = _maxHp;
+      }
+   }
+
+   public void BuffDamage(int amount)
+   {
+      _str += amount;
+      if (_str > _maxStr)
+      {
+         _str = _maxStr;
+      }
    }
    
    public int Turn => _turn;

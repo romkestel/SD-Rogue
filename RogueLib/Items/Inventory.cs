@@ -1,5 +1,4 @@
 using RogueLib.Dungeon;
-using SandBox01.Levels.Items;
 
 namespace RogueLib.Items;
 
@@ -10,6 +9,8 @@ public class Inventory
 
     public int Count => _bag.Count;
     
+    
+    // Checks the item type and ensures the player has no more than 3 of each item type at a time
     public bool AddItem(Item item)
     {
         if (item is Weapon && _bag.OfType<Weapon>().Count() >= 3)
@@ -29,7 +30,8 @@ public class Inventory
         _bag.Add(item);
         return true;
     }
-
+    
+    // For discarding unwanted loot
     public void RemoveItem(Item item)
     {
         _bag.Remove(item);

@@ -5,7 +5,7 @@ namespace RogueLib.Items;
 
 public class Gold : Item
 {
-    public Gold(Vector2 pos, int amount) : base('*', pos)
+    public Gold(Vector2 pos, int amount) : base('*', pos, ConsoleColor.Yellow)
     {
         Amount = amount;
     }
@@ -13,6 +13,6 @@ public class Gold : Item
     
     public override void Draw(IRenderWindow disp)
     {
-        disp.Draw(Glyph, Pos, ConsoleColor.Yellow);
+        disp.Draw(Glyph, Pos, Color);
     }
 }

@@ -54,14 +54,15 @@ public class Level : Scene {
       registerCommandsWithScene();
 
         SpreadItem();
-
       void SpreadItem()
       {
          var rng = new Random();
          var am = rng.Next(10, 20);
          var wep = rng.Next(0, 3);
          var armour = rng.Next(0, 2);
-
+         var hPotion = rng.Next(0, 2);
+         var strPotion = rng.Next(0, 2);
+         
             for (int i = 0; i < am; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
@@ -78,6 +79,18 @@ public class Level : Scene {
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
                 _items.Add(new Armour(tile, rng.Next(1, 11), 'X'));
+            }
+
+            for (int i = 0; i < hPotion; i++)
+            {
+               var tile = _floor.ElementAt(rng.Next(_floor.Count));
+               _items.Add(new HealthPotion(tile));
+            }
+
+            for (int i = 0; i < strPotion; i++)
+            {
+               var tile = _floor.ElementAt(rng.Next(_floor.Count));
+               _items.Add(new DamagePotion(tile));
             }
       }
 
@@ -165,9 +178,9 @@ public class Level : Scene {
          }
       }
    }
-
+   
    private void drawEnemies(IRenderWindow disp) { }
-
+   
    private void initMapTileSets(string map) {
       var lines = map.Split('\n');
 
@@ -211,7 +224,7 @@ public class Level : Scene {
 // Commands 
 // ------------------------------------------------------
 
-
+   
    private void registerCommandsWithScene() {
       RegisterCommand(ConsoleKey.UpArrow, "up");
       RegisterCommand(ConsoleKey.W, "up");
@@ -232,7 +245,7 @@ public class Level : Scene {
       RegisterCommand(ConsoleKey.Q, "quit");
    }
 
-
+   
    public void MovePlayer(Vector2 delta) {
       var newPos = _player!.Pos + delta;
       
