@@ -2,6 +2,7 @@ using RogueLib.Dungeon;
 using RogueLib.Engine;
 using RogueLib.Items;
 using RogueLib.Utilities;
+using RogueLib.Utilities.Enemies;
 using TileSet = System.Collections.Generic.HashSet<RogueLib.Utilities.Vector2>;
 
 namespace SandBox01.Levels;
@@ -37,7 +38,8 @@ public class Level : Scene {
    protected TileSet _discovered; // tiles the player has seen
    protected TileSet _inFov;      // current fov of player
 
-   protected List<Item> _items; 
+   protected List<Item> _items;
+    protected List<Enemy> _enemies;
    
    
    public Level(Player p, string map, Game game) {
@@ -49,15 +51,19 @@ public class Level : Scene {
       _map        = map;
       _game       = _game;
       _items      = new List<Item>(); // type of item
-      initMapTileSets(map);
+        _enemies   = new List<Enemy>();
+
+        initMapTileSets(map);
       updateDiscovered();
       registerCommandsWithScene();
-
+        SpawnEnemey();
         SpreadItem();
+
       void SpreadItem()
       {
          var rng = new Random();
          var am = rng.Next(10, 20);
+         
          var wep = rng.Next(0, 3);
          var armour = rng.Next(0, 2);
          var hPotion = rng.Next(0, 2);
@@ -78,7 +84,7 @@ public class Level : Scene {
             for (int i = 0; i < armour; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
-                _items.Add(new Armour(tile, rng.Next(1, 11), 'X'));
+                _items.Add(new Armour(tile, 10));
             }
 
             for (int i = 0; i < hPotion; i++)
@@ -93,22 +99,31 @@ public class Level : Scene {
                _items.Add(new DamagePotion(tile));
             }
       }
+        void SpawnEnemey()
+        {
+            var rng = new Random();
+            var am = rng.Next(10, 20);
+            var enemy = rng.Next(5, 10);
 
-
-        //void SpreadWeapons()
-        //{
-        //    var rng = new Random();
-        //    var am = rng.Next(10, 20);
-        //}
-
-        //void SpreadArmor()
-        //{
-        //    var rng = new Random();
-        //    var am = rng.Next(10, 20);
-        //}
+            for (int i = 0; i < enemy; i++)
+            {
+                var tile = _floor.ElementAt(rng.Next(_floor.Count));
+                _enemies.Add(new Goblin (tile, 5));
+            }
+            for (int i = 0; i < enemy; i++)
+            {
+                var tile = _floor.ElementAt(rng.Next(_floor.Count));
+                _enemies.Add(new Orc(tile, 10));
+            }
+            for (int i = 0; i < enemy; i++)
+            {
+                var tile = _floor.ElementAt(rng.Next(_floor.Count));
+                _enemies.Add(new Troll(tile, 15));
+            }
+        }
 
    }
-   
+    
    
 
    protected void updateDiscovered() {
@@ -167,7 +182,7 @@ public class Level : Scene {
    }
 
 // -------------------------------------------------------------------------
-
+    // Draws Items
    private void drawItems(IRenderWindow disp)
    {
       foreach (var i in _items)
@@ -178,9 +193,18 @@ public class Level : Scene {
          }
       }
    }
-   
-   private void drawEnemies(IRenderWindow disp) { }
-   
+    // Draws Enemies
+   private void drawEnemies(IRenderWindow disp) 
+    {
+         foreach (var e in _enemies)
+         {
+         if (_inFov.Contains(e.Pos) || _discovered.Contains(e.Pos))
+             {
+             e.Draw(disp);
+          }
+        }
+    }
+
    private void initMapTileSets(string map) {
       var lines = map.Split('\n');
 
@@ -242,6 +266,11 @@ public class Level : Scene {
       RegisterCommand(ConsoleKey.D, "right");
       RegisterCommand(ConsoleKey.L, "right");
 
+      RegisterCommand(ConsoleKey.I, "Inventory");
+      RegisterCommand(ConsoleKey.P, "Use Potion");
+      RegisterCommand(ConsoleKey.B, "Wear Armor");
+      RegisterCommand(ConsoleKey.U, "Use Weapon");
+
       RegisterCommand(ConsoleKey.Q, "quit");
    }
 
@@ -251,9 +280,10 @@ public class Level : Scene {
       
       if (_walkables.Contains(newPos)) {
          var itemToPickUp = _items.FirstOrDefault(i => i.Pos == newPos);
+                //_player.Attack(enemyToFight);
 
-         if (itemToPickUp != null)
-         {
+            if (itemToPickUp != null)
+            {
             if (itemToPickUp is Gold g)
             {
                _player.AddGold(g.Amount);
@@ -263,17 +293,87 @@ public class Level : Scene {
                _player.Bag.AddItem(itemToPickUp);
             }
             _items.Remove(itemToPickUp);
-         }
-         
-         var oldPos = _player!.Pos;
+            }
+
+            
+
+            var oldPos = _player!.Pos;
          _player!.Pos = newPos;
          _walkables.Remove(newPos); // new tile is now occupied
          _walkables.Add(oldPos);    // old tile is now free
          updateDiscovered();
       }
-   }
+        var enemyToFight = _enemies.FirstOrDefault(e => e.Pos == newPos);
 
-   public void QuitLevel() {
+        // Enemy Attacks Player
+        if (enemyToFight != null)
+        {
+            if (enemyToFight is Enemy e )
+            {
+
+                enemyToFight.Attack();
+                _player.Attack(enemyToFight);
+                _player.TakeDamage(enemyToFight._atk);
+
+                // check if player dies
+                if (_player != null && _player._hp <= 0)
+                {
+                    Console.WriteLine("You have been slain! Game Over.");
+                    QuitLevel();
+                    return;
+                }
+            }
+
+            
+        }
+
+
+
+    }
+
+    //public void EnemyMoves()
+    //{
+    //    foreach (var enemy in _enemies)
+    //    {
+    //        var chaser = enemy.Chase();
+    //        var newPos = enemy.Pos + chaser;
+    //        if (_walkables.Contains(newPos))
+    //        {
+    //            var fightEnemy = _enemies.FirstOrDefault(e => e.Pos == newPos);
+    //            if (fightEnemy != null)
+    //            {
+    //                Console.WriteLine($"{enemy.GetType().Name} attacks {fightEnemy.GetType().Name}!");
+    //            }
+    //        }
+    //        var oldPos = enemy.Pos;
+    //        enemy.Pos = newPos;
+    //        _walkables.Remove(newPos); // new tile is now occupied
+    //        _walkables.Add(oldPos);    // old tile is now free
+    //    }
+    //    updateDiscovered();
+    //}
+
+    //public void MoveEnemey(Enemy enemy, Vector2 delta)
+    //{
+    //    var newPos = enemy.Pos + delta;
+    //    if (_walkables.Contains(newPos))
+    //    {
+    //        var fightEnemy = _enemies.FirstOrDefault(e => e.Pos == newPos);
+    //        if (fightEnemy != null)
+    //        {
+    //            Console.WriteLine($"{enemy.GetType().Name} attacks {fightEnemy.GetType().Name}!");
+    //        }
+    //    }
+
+    //    var oldPos = enemy.Pos;
+    //    enemy.Pos = newPos;
+    //    _walkables.Remove(newPos); // new tile is now occupied
+    //    _walkables.Add(oldPos);    // old tile is now free
+    //    updateDiscovered();
+    //}
+
+
+    public void QuitLevel() {
       _levelActive = false;
    }
 }
