@@ -12,7 +12,7 @@ public class Orc : Enemy
 
     }
 
-    public override void Attack()
+    public override void Attack(Player _player)
     {
         Console.WriteLine("Orc swings a big Club!");
     }

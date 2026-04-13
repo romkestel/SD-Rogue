@@ -16,7 +16,7 @@ namespace RogueLib.Items
     {
         public int Defense { get; protected set; }
 
-        public Armour(Vector2 pos, int defense, char glyph) : base('X', pos, ConsoleColor.DarkGray)
+        public Armour(Vector2 pos, int defense) : base('X', pos, ConsoleColor.DarkGray)
         {
 
             Defense = defense;

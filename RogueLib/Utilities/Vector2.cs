@@ -6,8 +6,8 @@ namespace RogueLib.Utilities;
 // all addresses in a grid. 
 // 
 public struct Vector2 : IEquatable<Vector2>, IComparable<Vector2> {
-   public int X { get; }
-   public int Y { get; }
+   public int X { get; set; } // added set;
+   public int Y { get; set; } // added set;
 
    public Vector2(int x, int y) => (X, Y) = (x, y);
    public Vector2() : this(0, 0) { }

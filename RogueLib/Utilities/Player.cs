@@ -29,7 +29,7 @@ public abstract class Player : IActor, IDrawable {
    public void AddGold(int amount)
    {
       _gold += amount;
-   }
+   }    
    
    public void Heal(int amount)
    {

@@ -12,8 +12,7 @@ public class Goblin : Enemy
         
     }
 
-    public override void Attack()
-
+    public override void Attack(Player _player)
     {
         Console.WriteLine("Goblin attacks!");
     }

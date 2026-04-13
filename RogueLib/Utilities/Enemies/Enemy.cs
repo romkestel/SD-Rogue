@@ -12,7 +12,7 @@ public abstract class Enemy : IActor, IDrawable
     public ConsoleColor _color = ConsoleColor.Red;
         
     protected int _level = 1;
-    protected int _hp = 5;
+    public int _hp = 5;
     public int _atk = 4;
     protected int _arm = 1;
     protected int _expvalue = 10;
@@ -24,24 +24,27 @@ public abstract class Enemy : IActor, IDrawable
         Pos = pos;
     }
         
-    public abstract void Attack();
+    public abstract void Attack(Player _player);
 
-    //public void Chase(Player player)
-    //{
-    //    // Simple chasing logic: move towards the player
-    //    if (player.Pos.X < Pos.X)
-    //        Pos.X--;
+    // intellicense
+    public void Chase(Player player)
+    {
+        // Simple chasing logic: move towards the player
+        if (player.Pos.X < (Pos.X+1))
+            Pos.X--;
 
-    //    if (player.Pos.X > Pos.X)
-    //        Pos.X++;
+        if (player.Pos.X > (Pos.X-1))
+            Pos.X++;
 
-    //    if (player.Pos.Y < Pos.Y)
-    //        Pos.Y--;
+        if (player.Pos.Y < (Pos.Y+1))
+            Pos.Y--;
 
-    //    if (player.Pos.Y > Pos.Y)
-    //        Pos.Y++;
+        if (player.Pos.Y > (Pos.Y-1))
+            Pos.Y++;
+    }
 
-    //}
+
+
     public virtual void Draw(IRenderWindow disp)
     {
         disp.Draw(Glyph, Pos, ConsoleColor.Red);

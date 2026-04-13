@@ -12,7 +12,7 @@ public class Troll : Enemy
 
     }
 
-    public override void Attack()
+    public override void Attack(Player _player)
     {
         Console.WriteLine("Troll SMASH!");
     }

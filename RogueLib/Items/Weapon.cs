@@ -12,7 +12,7 @@ enum WeaponType
 }
 public class Weapon : Item
 {
-   public Weapon(Vector2 pos, int damage, char glyph) : base('T', pos, ConsoleColor.Gray)
+   public Weapon(Vector2 pos, int damage) : base('T', pos, ConsoleColor.Gray)
    {       
       Damage = damage;
    }

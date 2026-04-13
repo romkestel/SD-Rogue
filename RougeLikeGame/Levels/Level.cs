@@ -26,7 +26,7 @@ public class Level : Scene {
    // ---- level config ---- 
    protected string? _map;
    protected int     _senseRadius = 400;
-
+   
    // --- Tile Sets -----
    // used to keep track of state of tiles on the map
    protected TileSet _walkables; // walkable tiles 
@@ -39,8 +39,8 @@ public class Level : Scene {
    protected TileSet _inFov;      // current fov of player
 
    protected List<Item> _items;
-    protected List<Enemy> _enemies;
-   
+   protected List<Enemy> _enemies;
+    
    
    public Level(Player p, string map, Game game) {
       if (game == null || p == null || map == null)
@@ -49,17 +49,18 @@ public class Level : Scene {
       _player     = p;
       _player.Pos = new Vector2(4, 12); // random, or at stairs
       _map        = map;
-      _game       = _game;
+      _game       = game; // _game
       _items      = new List<Item>(); // type of item
-        _enemies   = new List<Enemy>();
+      _enemies   = new List<Enemy>();
 
         initMapTileSets(map);
-      updateDiscovered();
-      registerCommandsWithScene();
+        updateDiscovered();
+        registerCommandsWithScene();
         SpawnEnemey();
         SpreadItem();
 
-      void SpreadItem()
+        // Spawns Items
+        void SpreadItem()
       {
          var rng = new Random();
          var am = rng.Next(10, 20);
@@ -69,6 +70,7 @@ public class Level : Scene {
          var hPotion = rng.Next(0, 2);
          var strPotion = rng.Next(0, 2);
          
+
             for (int i = 0; i < am; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
@@ -78,13 +80,13 @@ public class Level : Scene {
             for (int i = 0; i < wep; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
-                _items.Add(new Weapon(tile, rng.Next(1, 11), 'T'));
+                _items.Add(new Weapon(tile, 10));
             }
 
             for (int i = 0; i < armour; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
-                _items.Add(new Armour(tile, 10));
+                _items.Add(new Armour(tile, 15));
             }
 
             for (int i = 0; i < hPotion; i++)
@@ -99,11 +101,13 @@ public class Level : Scene {
                _items.Add(new DamagePotion(tile));
             }
       }
+
+        // Spawns Enemies
         void SpawnEnemey()
         {
             var rng = new Random();
             var am = rng.Next(10, 20);
-            var enemy = rng.Next(5, 10);
+            var enemy = rng.Next(1, 3);
 
             for (int i = 0; i < enemy; i++)
             {
@@ -121,10 +125,7 @@ public class Level : Scene {
                 _enemies.Add(new Troll(tile, 15));
             }
         }
-
    }
-    
-   
 
    protected void updateDiscovered() {
       _inFov = fovCalc(_player!.Pos, _senseRadius);
@@ -139,12 +140,36 @@ public class Level : Scene {
       => Vector2.getAllTiles().Where(t => (pos - t).RookLength < sens).ToHashSet();
 
    // -----------------------------------------------------------------------
-   public override void Update() {
+    
+
+   public void EnemyPov()
+    {
+      foreach (var e in _enemies)
+        {
+            // I need a method for the enemy to chase the player when
+            // within enemy radius BUT it needs to only chase the
+            // player WITHIN walkable tiles
+            var enemyFov = (e.Pos - _player.Pos).RookLength; //fovCalc(e.Pos, _senseRadius);
+                        
+            if (enemyFov < 10)
+            {
+                IsTileOccupied(_player.Pos);
+                IsTileOccupied(e.Pos);
+                e.Chase(_player);
+            }                
+        }
+        updateDiscovered();
+    }
+
+    public override void Update() {
       _player!.Update();
-      // foreach item update
-      // foreach NPC update 
-      // check for player death -- on death build RIP message
-   }
+
+        EnemyPov();
+        updateDiscovered();
+        // foreach item update
+        // foreach NPC update 
+        // check for player death -- on death build RIP message
+    }
 
    public override void Draw(IRenderWindow? disp) {
       // using custom RenderWindow, cast to my RenderWindow
@@ -157,12 +182,13 @@ public class Level : Scene {
       var rng = new Random();
       if (_player.Turn % 5 == 0)
          _player._color = (ConsoleColor)rng.Next(10, 16);
-      _player!.Draw(disp);
+      
       // disp.Draw(_player!.Glyph, _player!.Pos, ConsoleColor.Cyan);
 
       drawItems(disp);
       drawEnemies(disp);
-      disp.Draw(_player.HUD, new Vector2(0, 24), ConsoleColor.Green);
+      _player!.Draw(disp);
+        disp.Draw(_player.HUD, new Vector2(0, 24), ConsoleColor.Green);
    }
 
    public override void DoCommand(Command command) {
@@ -277,103 +303,76 @@ public class Level : Scene {
    
    public void MovePlayer(Vector2 delta) {
       var newPos = _player!.Pos + delta;
-      
-      if (_walkables.Contains(newPos)) {
-         var itemToPickUp = _items.FirstOrDefault(i => i.Pos == newPos);
-                //_player.Attack(enemyToFight);
+        var enemy = _enemies.FirstOrDefault(e => e.Pos == newPos && e._hp > 0);
+        if (enemy != null) 
+        { 
+            _player.Attack(enemy);
+            enemy.Attack(_player);
 
-            if (itemToPickUp != null)
+            if (enemy._hp <= 0)
             {
-            if (itemToPickUp is Gold g)
-            {
-               _player.AddGold(g.Amount);
-            }
-            else
-            {
-               _player.Bag.AddItem(itemToPickUp);
-            }
-            _items.Remove(itemToPickUp);
+                _enemies.Remove(enemy);
             }
 
-            
-
-            var oldPos = _player!.Pos;
-         _player!.Pos = newPos;
-         _walkables.Remove(newPos); // new tile is now occupied
-         _walkables.Add(oldPos);    // old tile is now free
-         updateDiscovered();
-      }
-        var enemyToFight = _enemies.FirstOrDefault(e => e.Pos == newPos);
-
-        // Enemy Attacks Player
-        if (enemyToFight != null)
-        {
-            if (enemyToFight is Enemy e )
-            {
-
-                enemyToFight.Attack();
-                _player.Attack(enemyToFight);
-                _player.TakeDamage(enemyToFight._atk);
-
-                // check if player dies
-                if (_player != null && _player._hp <= 0)
-                {
-                    Console.WriteLine("You have been slain! Game Over.");
-                    QuitLevel();
-                    return;
-                }
-            }
-
-            
+            return;
         }
 
+        if (_walkables.Contains(newPos)) {
+            var itemToPickUp = _items.FirstOrDefault(i => i.Pos == newPos);
+            
+            if (itemToPickUp != null)
+            {
+                if (itemToPickUp is Gold g)
+                {
+                    _player.AddGold(g.Amount);
+                }
+                else
+                {
+                    _player.Bag.AddItem(itemToPickUp);
+                }
+                _items.Remove(itemToPickUp);
+            }
 
-
+            var oldPos = _player!.Pos;
+            _player!.Pos = newPos;
+            //_walkables.Remove(newPos); // new tile is now occupied
+            //_walkables.Add(oldPos);    // old tile is now free
+                        
+        }
+            updateDiscovered();
     }
 
-    //public void EnemyMoves()
-    //{
-    //    foreach (var enemy in _enemies)
-    //    {
-    //        var chaser = enemy.Chase();
-    //        var newPos = enemy.Pos + chaser;
-    //        if (_walkables.Contains(newPos))
-    //        {
-    //            var fightEnemy = _enemies.FirstOrDefault(e => e.Pos == newPos);
-    //            if (fightEnemy != null)
-    //            {
-    //                Console.WriteLine($"{enemy.GetType().Name} attacks {fightEnemy.GetType().Name}!");
-    //            }
-    //        }
-    //        var oldPos = enemy.Pos;
-    //        enemy.Pos = newPos;
-    //        _walkables.Remove(newPos); // new tile is now occupied
-    //        _walkables.Add(oldPos);    // old tile is now free
-    //    }
-    //    updateDiscovered();
-    //}
+    // I need a way for enemy Glyphs not be walkable and needs to stay on screen until hp is 0
+    // checks if there is an enemy already on the tiles.
+    private bool IsTileOccupied(Vector2 pos)
+    {
+        if (_player.Pos == pos)
+            return true;
 
-    //public void MoveEnemey(Enemy enemy, Vector2 delta)
+        return _enemies.Any(e => e.Pos == pos && e._hp > 0);
+    }
+
+    //public void MoveEnemy(Vector2 delta)
     //{
-    //    var newPos = enemy.Pos + delta;
-    //    if (_walkables.Contains(newPos))
+    //    var dy = delta.Y - _enemies.Pos.Y;
+
+    //    var newPos = _enemies!.Pos + delta;
+
+    //    // Move from MovePlayer Method
+    //    if (_walkables.Contains(newPos) || IsTileOccupied(newPos))
     //    {
-    //        var fightEnemy = _enemies.FirstOrDefault(e => e.Pos == newPos);
-    //        if (fightEnemy != null)
-    //        {
-    //            Console.WriteLine($"{enemy.GetType().Name} attacks {fightEnemy.GetType().Name}!");
-    //        }
+    //        var oldPos = _enemies.Pos;
+    //        _enemies.Pos = newPos;
+         
     //    }
 
-    //    var oldPos = enemy.Pos;
-    //    enemy.Pos = newPos;
-    //    _walkables.Remove(newPos); // new tile is now occupied
-    //    _walkables.Add(oldPos);    // old tile is now free
     //    updateDiscovered();
     //}
-
 
     public void QuitLevel() {
       _levelActive = false;
    }
+
+
+
 }
