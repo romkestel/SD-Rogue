@@ -52,8 +52,8 @@ public static class DungeonConfig {
              ###############
       """;
 
-  static string RIP =
-      """
+  public static string RIP =
+      $"""
 
                     __________
                    /          \
@@ -61,10 +61,10 @@ public static class DungeonConfig {
                  /      IN      \
                 /     PEACE      \
                /                  \
-               |  Dave Burchill   |
+               | Quinn Tessential |
                |      110 Au      |
                |   killed by a    |
-               |      snake       |
+               |      Goblin      |
                |       2026       |
               *|     *  *  *      | *
       ________)/\\_//(\/(/\)/\//\/|_)_______

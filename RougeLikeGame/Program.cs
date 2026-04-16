@@ -6,6 +6,8 @@ using TileSet = System.Collections.Generic.HashSet<RogueLib.Utilities.Vector2>;
 using SandBox01.Levels;
 
 namespace RlGameNS;
+
+using RogueLib;
 using Spectre.Console;
 
 class Program {
@@ -120,6 +122,7 @@ class Program {
                                               \"_____/      \__/     \_______)|__|  \___)                                                  
                                        [/]
                                        """);
+            AnsiConsole.MarkupLine(DungeonConfig.RIP);
                 AnsiConsole.MarkupLine("[Yellow4]Press any key to return to the main menu[/]");
                 Console.ReadKey();
             }

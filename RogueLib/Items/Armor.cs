@@ -11,7 +11,6 @@ public enum ArmourType
 
 namespace RogueLib.Items
 {
-    
     public class Armour : Item, IEquatable<Armour>
     {
         public int Defense => (int)Type;
