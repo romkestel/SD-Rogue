@@ -35,14 +35,14 @@ class Program {
                            """)
                     .AddChoices
                         (
-                              "(1) Play the game",
+                              "Play the game",
                               "Quit"
                         )
                         );
 
                     switch (userSelection)
                     {
-                        case "(1) Play the game":
+                        case "Play the game":
                                 StartGame();
                                 break;
 
