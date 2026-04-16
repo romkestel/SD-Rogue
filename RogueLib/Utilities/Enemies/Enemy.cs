@@ -40,22 +40,83 @@ public abstract class Enemy : IActor, IDrawable
         _hp -= damageTaken;
     }
 
-    // intellicense
-    public void Chase(Player player)
+    //// intellicense
+    //public void Chase(Player player)
+    //{
+    //    // Simple chasing logic: move towards the player
+    //    if (player.Pos.X < (Pos.X+1))
+    //        Pos.X--;
+
+    //    if (player.Pos.X > (Pos.X-1))
+    //        Pos.X++;
+
+    //    if (player.Pos.Y < (Pos.Y+1))
+    //        Pos.Y--;
+
+    //    if (player.Pos.Y > (Pos.Y-1))
+    //        Pos.Y++;
+    //}
+
+    // PROMPT : Show me a code where Enemies does only walks on walkable tiles
+    public void Chase(Player player) => Chase(player, pos => true);
+
+    // New: only move when canMove returns true (use Level to pass walkable + occupancy checks)
+    public void Chase(Player player, Func<Vector2, bool> canMove)
     {
-        // Simple chasing logic: move towards the player
-        if (player.Pos.X < (Pos.X+1))
-            Pos.X--;
+        // Basic greedy step towards player with checks
+        var dx = Math.Sign(player.Pos.X - Pos.X);
+        var dy = Math.Sign(player.Pos.Y - Pos.Y);
 
-        if (player.Pos.X > (Pos.X-1))
-            Pos.X++;
+        // Try horizontal step first
+        if (dx != 0)
+        {
+            var candidate = new Vector2(Pos.X + dx, Pos.Y);
+            if (canMove(candidate))
+            {
+                Pos = candidate;
+                return;
+            }
+        }
+        // Try vertical step
+        if (dy != 0)
+        {
+            var candidate = new Vector2(Pos.X, Pos.Y + dy);
+            if (canMove(candidate))
+            {
+                Pos = candidate;
+                return;
+            }
+        }
+        // Try diagonal
+        if (dx != 0 && dy != 0)
+        {
+            var candidate = new Vector2(Pos.X + dx, Pos.Y + dy);
+            if (canMove(candidate))
+            {
+                Pos = candidate;
+                return;
+            }
+        }
+        // Fallback: try any adjacent cardinal tile
+        var neighbors = new[]
+        {
+        new Vector2(Pos.X + 1, Pos.Y),
+        new Vector2(Pos.X - 1, Pos.Y),
+        new Vector2(Pos.X, Pos.Y + 1),
+        new Vector2(Pos.X, Pos.Y - 1)
+    };
+        foreach (var n in neighbors)
+        {
+            if (canMove(n))
+            {
+                Pos = n;
+                return;
+            }
+        }
 
-        if (player.Pos.Y < (Pos.Y+1))
-            Pos.Y--;
-
-        if (player.Pos.Y > (Pos.Y-1))
-            Pos.Y++;
+        // If none available, stay in place
     }
+
 
 
 

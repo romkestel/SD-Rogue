@@ -139,24 +139,23 @@ public class Level : Scene {
    protected TileSet fovCalc(Vector2 pos, int sens)
       => Vector2.getAllTiles().Where(t => (pos - t).RookLength < sens).ToHashSet();
 
-   // -----------------------------------------------------------------------
-    
+    // -----------------------------------------------------------------------
 
-   public void EnemyPov()
+
+    public void EnemyPov() // -- TEAM
     {
-      foreach (var e in _enemies)
+        foreach (var e in _enemies)
         {
             // I need a method for the enemy to chase the player when
             // within enemy radius BUT it needs to only chase the
             // player WITHIN walkable tiles
-            var enemyFov = (e.Pos - _player.Pos).RookLength; //fovCalc(e.Pos, _senseRadius);
-                        
-            if (enemyFov < 10)
+            var enemyFov = (e.Pos - _player.Pos).KingLength; //fovCalc(e.Pos, _senseRadius);
+
+            if (enemyFov <= 3) // enemy field vision to chase
             {
-                IsTileOccupied(_player.Pos);
-                IsTileOccupied(e.Pos);
-                e.Chase(_player);
-            }                
+                // pass a predicate so the enemy only moves onto walkable, unoccupied tiles
+                e.Chase(_player, pos => _walkables.Contains(pos) && !IsTileOccupied(pos));
+            }
         }
         updateDiscovered();
     }
