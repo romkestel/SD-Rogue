@@ -9,12 +9,13 @@ public class Orc : Enemy
 {
     public Orc(Vector2 pos, int damage) : base('O', pos)
     {
-
+        _atk = damage;
     }
 
     public override void Attack(Player _player)
     {
         Console.WriteLine("Orc swings a big Club!");
+        base.Attack(_player);
     }
 
 

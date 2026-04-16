@@ -16,6 +16,7 @@ public abstract class Enemy : IActor, IDrawable
     public int _atk = 4;
     protected int _arm = 1;
     protected int _expvalue = 10;
+    public int ExpValue => _expvalue;
     protected int _turn = 0;
     
     
@@ -26,7 +27,18 @@ public abstract class Enemy : IActor, IDrawable
         Pos = pos;
     }
         
-    public abstract void Attack(Player _player);
+    public virtual void Attack(Player player)
+    {
+        // Default attack behaviour: deal this enemy's attack value to the player.
+        // Player.TakeDamage will account for the player's armour.
+        player.TakeDamage(_atk);
+    }
+
+    public void TakeDamage(int damage)
+    {
+        int damageTaken = Math.Max(0, damage - _arm);
+        _hp -= damageTaken;
+    }
 
     // intellicense
     public void Chase(Player player)

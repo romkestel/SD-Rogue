@@ -166,9 +166,31 @@ public class Level : Scene {
 
         EnemyPov();
         updateDiscovered();
+
+        // check for player death -- show GAME OVER screen and end level
+        if (_player.Hp <= 0)
+        {
+            // Clear the console and show a simple GAME OVER screen
+            Console.Clear();
+            var msg = "GAME OVER";
+            var sub = "Press any key to exit";
+            int cx = Math.Max(0, (Game.width - msg.Length) / 2);
+            int cy = Math.Max(0, Game.height / 2);
+            try { Console.SetCursorPosition(cx, cy); } catch { }
+            var prev = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(msg);
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine();
+            Console.WriteLine(sub);
+            Console.ForegroundColor = prev;
+            Console.ReadKey(true);
+
+            _levelActive = false;
+            return;
+        }
         // foreach item update
         // foreach NPC update 
-        // check for player death -- on death build RIP message
     }
 
    public override void Draw(IRenderWindow? disp) {
@@ -182,10 +204,6 @@ public class Level : Scene {
       tilesToDraw.UnionWith(_inFov);
 
       disp.fDraw(tilesToDraw, _map, ConsoleColor.Gray);
-
-      var rng = new Random();
-      if (_player.Turn % 5 == 0)
-         _player._color = (ConsoleColor)rng.Next(10, 16);
       
       // disp.Draw(_player!.Glyph, _player!.Pos, ConsoleColor.Cyan);
 
@@ -310,13 +328,18 @@ public class Level : Scene {
    public void MovePlayer(Vector2 delta) {
       var newPos = _player!.Pos + delta;
         var enemy = _enemies.FirstOrDefault(e => e.Pos == newPos && e._hp > 0);
-        if (enemy != null) 
-        { 
+        if (enemy != null)
+        {
             _player.Attack(enemy);
-            enemy.Attack(_player);
 
+            // only let the enemy attack back if it's still alive
+            if (enemy._hp > 0)
+                enemy.Attack(_player);
+
+            // if enemy died from the player's attack, give exp and remove
             if (enemy._hp <= 0)
             {
+                _player.AddExp(enemy.ExpValue);
                 _enemies.Remove(enemy);
             }
 

@@ -15,6 +15,7 @@ public abstract class Player : IActor, IDrawable {
    protected int _str    = 16;
    protected int _arm    = 4;
    protected int _exp    = 0;
+   protected int _expToLevel = 10;
    protected int _gold   = 0;
    protected int _maxHp  = 12;
    protected int _maxStr = 16;
@@ -136,7 +137,7 @@ public abstract class Player : IActor, IDrawable {
    {
       get
       {
-         var line1 = $"Level:{_level}  Gold:{_gold}  Hp:{_hp}({_maxHp})  Str:{Str}  Arm:{Arm}  Exp:{_exp}/10  Turn:{_turn}".PadRight(78);
+         var line1 = $"Level:{_level}  Gold:{_gold}  Hp:{_hp}({_maxHp})  Str:{Str}  Arm:{Arm}  Exp:{_exp}/{_expToLevel}  Turn:{_turn}".PadRight(78);
          var line2 = $"Wpn: {EquippedWeaponName} ({EquippedWeaponDamage})   Arm: {EquippedArmourName} ({EquippedArmourDefense})".PadRight(78); 
          return line1 + "\r\n" + line2;
       }
@@ -145,6 +146,38 @@ public abstract class Player : IActor, IDrawable {
    
     public void Attack(Enemy enemy)
     {
+        // Base damage is 1 when unarmed. If a weapon is equipped use its Damage
+        int baseDamage = 1;
+        double multiplier = 1.0;
+
+        if (_equippedWeapon is not null)
+        {
+            baseDamage = _equippedWeapon.Damage;
+            multiplier = 1.0 + 0.1 * Math.Max(0, _equippedWeapon.Level - 1);
+        }
+
+        var raw = baseDamage * multiplier;
+        int damage = Math.Max(1, (int)Math.Ceiling(raw));
+
+        enemy.TakeDamage(damage);
+    }
+
+    public void AddExp(int amount)
+    {
+        _exp += amount;
+        // level up while we have enough exp
+        while (_exp >= _expToLevel)
+        {
+            _exp -= _expToLevel;
+            _expToLevel++;
+            _level++;
+            // increase all player stats by 1
+            _maxHp++;
+            // reset HP to full on level up
+            _hp = _maxHp;
+            _maxStr++;
+            _str++;
+        }
     }
     // Increase defense depending on armour type
     public void ItemEquipped(Weapon weaponType, Armour armourType)
@@ -156,13 +189,12 @@ public abstract class Player : IActor, IDrawable {
     {
         int damageTaken = Math.Max(0, damage - _arm);
         _hp -= damageTaken;
-        
     }
 
     public virtual void Update() {
        
       _turn++;
-   }
+    }
 
    public virtual void Draw(IRenderWindow disp) {
       disp.Draw(Glyph, Pos, _color);

@@ -9,12 +9,13 @@ public class Troll : Enemy
 {
     public Troll(Vector2 pos, int dmge) : base('T', pos)
     {
-
+        _atk = dmge;
     }
 
     public override void Attack(Player _player)
     {
         Console.WriteLine("Troll SMASH!");
+        base.Attack(_player);
     }
 
 

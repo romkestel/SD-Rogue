@@ -9,12 +9,13 @@ public class Goblin : Enemy
 {
     public Goblin(Vector2 pos, int damage) : base('G', pos)
     {
-        
+        _atk = damage;
     }
 
     public override void Attack(Player _player)
     {
         Console.WriteLine("Goblin attacks!");
+        base.Attack(_player);
     }
     
 
