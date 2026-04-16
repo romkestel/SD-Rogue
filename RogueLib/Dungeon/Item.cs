@@ -11,6 +11,7 @@ public abstract class Item : IDrawable
         Color = color;
     }
     
+    
     public ConsoleColor Color { get; init; }
     
     public char Glyph { get; init; }

@@ -4,29 +4,26 @@ namespace RogueLib.Items;
 
 public class Inventory
 {
-    private List<Item> _bag = new();
+    // Encapsulated private readonly List exposed through an IReadOnlyList
+    // To prevent outside classes from wiping the List of elements
+    private readonly List<Item> _bag = new();
     public IReadOnlyList<Item> Bag => _bag.AsReadOnly();
 
     public int Count => _bag.Count;
     
+    // "helper" collection for easier access to specific sets of Items 
+    // in the inventory
+    public IEnumerable<Weapon> Weapons => _bag.OfType<Weapon>();
+    public IEnumerable<Armour> Armours => _bag.OfType<Armour>();
+    public IEnumerable<Potion> Potions => _bag.OfType<Potion>();
     
-    // Checks the item type and ensures the player has no more than 3 of each item type at a time
+    // Checks the Item type and the Count of said type through the IEnumerable
+    // properties
     public bool AddItem(Item item)
     {
-        if (item is Weapon && _bag.OfType<Weapon>().Count() >= 3)
-        {
-            return false;
-        }
-
-        if (item is Armour && _bag.OfType<Armour>().Count() >= 3)
-        {
-            return false;
-        }
-
-        if (item is Potion && _bag.OfType<Potion>().Count() >= 3)
-        {
-            return false;
-        }
+        if (item is Weapon && Weapons.Count() >= 3) return false;
+        if (item is Armour && Armours.Count() >= 3) return false;
+        if (item is Potion && Potions.Count() >= 3) return false;
         _bag.Add(item);
         return true;
     }

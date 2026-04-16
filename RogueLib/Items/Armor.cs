@@ -1,31 +1,47 @@
 ﻿using RogueLib.Dungeon;
 using RogueLib.Utilities;
 
-enum ArmourType
+public enum ArmourType
 {
-    LeatherArmour = 3,
-    SteelArmour = 6,
-    PlateArmour = 9,
-    MithrilArmour = 12,
+    LeatherArmour = 1,
+    SteelArmour,
+    PlateArmour,
+    MithrilArmour,
 }
 
 namespace RogueLib.Items
 {
     
-    public class Armour : Item
+    public class Armour : Item, IEquatable<Armour>
     {
-        public int Defense { get; protected set; }
+        public int Defense => (int)Type;
 
-        public Armour(Vector2 pos, int defense) : base('X', pos, ConsoleColor.DarkGray)
+        public string Name => Type.ToString();
+        
+        public ArmourType Type { get; }
+        
+        // Auto rng / Auto generating constructor for easy Item generation
+        public Armour(Vector2 pos, Random rng) : base('X', pos, ConsoleColor.DarkGray)
         {
-
-            Defense = defense;
+            var values = Enum.GetValues<ArmourType>();
+            Type = values[rng.Next(values.Length)];
         }
-
+        
         public override void Draw(IRenderWindow disp)
         {
             disp.Draw(Glyph, Pos, Color);
         }
+        
+        // Implementing all of these to prevent reflection do to
+        // all the LINQ beng applied to them in Inventory
+        public bool Equals(Armour? other)
+            => other is not null && Type == other.Type;
+   
+        public override bool Equals(object? obj)
+            => Equals(obj as Armour);
+   
+        public override int GetHashCode()
+            => Type.GetHashCode();
 
     }
 }

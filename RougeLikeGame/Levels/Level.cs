@@ -80,13 +80,13 @@ public class Level : Scene {
             for (int i = 0; i < wep; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
-                _items.Add(new Weapon(tile, 10));
+                _items.Add(new Weapon(tile, rng));
             }
 
             for (int i = 0; i < armour; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
-                _items.Add(new Armour(tile, 15));
+                _items.Add(new Armour(tile, rng));
             }
 
             for (int i = 0; i < hPotion; i++)
@@ -173,7 +173,11 @@ public class Level : Scene {
 
    public override void Draw(IRenderWindow? disp) {
       // using custom RenderWindow, cast to my RenderWindow
-      var tilesToDraw = new TileSet(_decor);
+      var tilesToDraw = new TileSet(_floor);
+      tilesToDraw.UnionWith(_tunnel);
+      tilesToDraw.UnionWith(_door);
+      tilesToDraw.UnionWith(_decor);
+      
       tilesToDraw.IntersectWith(_discovered);
       tilesToDraw.UnionWith(_inFov);
 
@@ -188,7 +192,7 @@ public class Level : Scene {
       drawItems(disp);
       drawEnemies(disp);
       _player!.Draw(disp);
-        disp.Draw(_player.HUD, new Vector2(0, 24), ConsoleColor.Green);
+      disp.Draw(_player.HUD, new Vector2(0, 23), ConsoleColor.Green);
    }
 
    public override void DoCommand(Command command) {
@@ -204,6 +208,15 @@ public class Level : Scene {
       } // game ctl      
       else if (command.Name == "quit") {
          _levelActive = false;
+      } else if (command.Name == "drink-first-potion")
+      {
+          _player!.DrinkFirstPotion();
+      } else if (command.Name == "cycle-weapon")
+      {
+          _player!.CycleWeapon();
+      } else if (command.Name == "cycle-armour")
+      {
+          _player!.CycleArmour();
       }
    }
 
@@ -213,10 +226,7 @@ public class Level : Scene {
    {
       foreach (var i in _items)
       {
-         if (_inFov.Contains(i.Pos) || _discovered.Contains(i.Pos))
-         {
-            i.Draw(disp);
-         }
+         if (_inFov.Contains(i.Pos) || _discovered.Contains(i.Pos)) i.Draw(disp);
       }
    }
     // Draws Enemies
@@ -224,11 +234,8 @@ public class Level : Scene {
     {
          foreach (var e in _enemies)
          {
-         if (_inFov.Contains(e.Pos) || _discovered.Contains(e.Pos))
-             {
-             e.Draw(disp);
-          }
-        }
+            if (_inFov.Contains(e.Pos) || _discovered.Contains(e.Pos)) e.Draw(disp); 
+         }
     }
 
    private void initMapTileSets(string map) {
@@ -291,12 +298,11 @@ public class Level : Scene {
       RegisterCommand(ConsoleKey.RightArrow, "right");
       RegisterCommand(ConsoleKey.D, "right");
       RegisterCommand(ConsoleKey.L, "right");
-
-      RegisterCommand(ConsoleKey.I, "Inventory");
-      RegisterCommand(ConsoleKey.P, "Use Potion");
-      RegisterCommand(ConsoleKey.B, "Wear Armor");
-      RegisterCommand(ConsoleKey.U, "Use Weapon");
-
+      
+      RegisterCommand(ConsoleKey.I, "cycle-weapon");
+      RegisterCommand(ConsoleKey.P, "drink-first-potion");
+      RegisterCommand(ConsoleKey.O, "cycle-armour");
+      
       RegisterCommand(ConsoleKey.Q, "quit");
    }
 
@@ -325,12 +331,16 @@ public class Level : Scene {
                 if (itemToPickUp is Gold g)
                 {
                     _player.AddGold(g.Amount);
+                    _items.Remove(itemToPickUp);
                 }
                 else
                 {
-                    _player.Bag.AddItem(itemToPickUp);
+                    if (_player.Inventory.AddItem(itemToPickUp))
+                    {
+                        _player.TryAutoPickup(itemToPickUp);
+                        _items.Remove(itemToPickUp);
+                    }
                 }
-                _items.Remove(itemToPickUp);
             }
 
             var oldPos = _player!.Pos;
@@ -338,9 +348,8 @@ public class Level : Scene {
             //_walkables.Remove(newPos); // new tile is now occupied
             //_walkables.Add(oldPos);    // old tile is now free
                         
-        }
-            updateDiscovered();
-    }
+        } 
+   }
 
     // I need a way for enemy Glyphs not be walkable and needs to stay on screen until hp is 0
     // checks if there is an enemy already on the tiles.

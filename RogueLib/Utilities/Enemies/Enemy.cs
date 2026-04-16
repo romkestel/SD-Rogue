@@ -17,7 +17,9 @@ public abstract class Enemy : IActor, IDrawable
     protected int _arm = 1;
     protected int _expvalue = 10;
     protected int _turn = 0;
-
+    
+    
+    
     public Enemy(char glyph, Vector2 pos)
     {        
         Glyph = glyph;
