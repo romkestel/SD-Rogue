@@ -5,7 +5,7 @@ namespace RogueLib.Items;
 
 public class HealthPotion : Potion
 {
-    public HealthPotion(Vector2 pos) : base(pos, ConsoleColor.Red) { }
+    public HealthPotion(Vector2 pos) : base(pos, ConsoleColor.Green) { }
     
     private static Random rng = new Random();
     

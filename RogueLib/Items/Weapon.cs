@@ -21,7 +21,7 @@ public class Weapon : Item, IEquatable<Weapon>
    public int Level { get; set; } = 1;
    
    // Auto rng / Auto generating constructor for easy Item generation
-   public Weapon(Vector2 pos, Random rng) : base('T', pos, ConsoleColor.Gray)
+   public Weapon(Vector2 pos, Random rng) : base('W', pos, ConsoleColor.Cyan)
    {
       var values = Enum.GetValues<WeaponType>();
       Type = values[rng.Next(values.Length)];
@@ -29,7 +29,7 @@ public class Weapon : Item, IEquatable<Weapon>
    }
    
    // Full constructor just in case
-   public Weapon(Vector2 pos, WeaponType type) : base('T', pos, ConsoleColor.Gray)
+   public Weapon(Vector2 pos, WeaponType type) : base('W', pos, ConsoleColor.Cyan)
    {
       Type = type;
       Level = 1;

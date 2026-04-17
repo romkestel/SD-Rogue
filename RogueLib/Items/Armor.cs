@@ -20,7 +20,7 @@ namespace RogueLib.Items
         public ArmourType Type { get; }
         
         // Auto rng / Auto generating constructor for easy Item generation
-        public Armour(Vector2 pos, Random rng) : base('X', pos, ConsoleColor.DarkGray)
+        public Armour(Vector2 pos, Random rng) : base('X', pos, ConsoleColor.Yellow)
         {
             var values = Enum.GetValues<ArmourType>();
             Type = values[rng.Next(values.Length)];
