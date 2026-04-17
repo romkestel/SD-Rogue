@@ -61,48 +61,51 @@ public class Level : Scene {
         SpawnEnemy();
         SpreadItem();
 
-        // Spawns Items
-        void SpreadItem()
-      {
-         var rng = new Random();
-         var am = rng.Next(10, 20);
-         
-         var wep = rng.Next(1, 3);
-         var armour = rng.Next(1, 3);
-         var hPotion = rng.Next(1, 3);
-         var strPotion = rng.Next(0, 1);
-         
+        
+   }
 
-            for (int i = 0; i < am; i++)
-            {
-                var tile = _floor.ElementAt(rng.Next(_floor.Count));
-                _items.Add(new Gold(tile, rng.Next(2, 61)));
-            }
+    // Spawns Items
+    public void SpreadItem()
+    {
+        var rng = new Random();
+        var am = rng.Next(10, 20);
 
-            for (int i = 0; i < wep; i++)
-            {
-                var tile = _floor.ElementAt(rng.Next(_floor.Count));
-                _items.Add(new Weapon(tile, rng));
-            }
+        var wep = rng.Next(1, 3);
+        var armour = rng.Next(1, 3);
+        var hPotion = rng.Next(1, 3);
+        var strPotion = rng.Next(0, 1);
 
-            for (int i = 0; i < armour; i++)
-            {
-                var tile = _floor.ElementAt(rng.Next(_floor.Count));
-                _items.Add(new Armour(tile, rng));
-            }
 
-            for (int i = 0; i < hPotion; i++)
-            {
-               var tile = _floor.ElementAt(rng.Next(_floor.Count));
-               _items.Add(new HealthPotion(tile));
-            }
+        for (int i = 0; i < am; i++)
+        {
+            var tile = _floor.ElementAt(rng.Next(_floor.Count));
+            _items.Add(new Gold(tile, rng.Next(2, 61)));
+        }
 
-            for (int i = 0; i < strPotion; i++)
-            {
-               var tile = _floor.ElementAt(rng.Next(_floor.Count));
-               _items.Add(new DamagePotion(tile));
-            }
-      }
+        for (int i = 0; i < wep; i++)
+        {
+            var tile = _floor.ElementAt(rng.Next(_floor.Count));
+            _items.Add(new Weapon(tile, rng));
+        }
+
+        for (int i = 0; i < armour; i++)
+        {
+            var tile = _floor.ElementAt(rng.Next(_floor.Count));
+            _items.Add(new Armour(tile, rng));
+        }
+
+        for (int i = 0; i < hPotion; i++)
+        {
+            var tile = _floor.ElementAt(rng.Next(_floor.Count));
+            _items.Add(new HealthPotion(tile));
+        }
+
+        for (int i = 0; i < strPotion; i++)
+        {
+            var tile = _floor.ElementAt(rng.Next(_floor.Count));
+            _items.Add(new DamagePotion(tile));
+        }
+    }
 
         // Spawns Enemies
         void SpawnEnemy()
@@ -128,9 +131,9 @@ public class Level : Scene {
                 _enemies.Add(new Troll(tile));
             }
         }
-   }
+    }
 
-   protected void updateDiscovered() {
+    protected void updateDiscovered() {
       _inFov = fovCalc(_player!.Pos, _senseRadius);
 
       if (_discovered is null)
