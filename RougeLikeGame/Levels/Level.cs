@@ -108,19 +108,21 @@ public class Level : Scene {
         void SpawnEnemy()
         {
             var rng = new Random();
-            var enemy = rng.Next(1, 4);
+            var goblins = rng.Next(3, 7);
+            var orcs = rng.Next(2, 5);
+            var trolls = rng.Next(1, 4);
 
-            for (int i = 0; i < enemy; i++)
+            for (int i = 0; i < goblins; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
                 _enemies.Add(new Goblin (tile));
             }
-            for (int i = 0; i < enemy; i++)
+            for (int i = 0; i < orcs; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
                 _enemies.Add(new Orc(tile));
             }
-            for (int i = 0; i < enemy; i++)
+            for (int i = 0; i < trolls; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
                 _enemies.Add(new Troll(tile));
@@ -206,6 +208,7 @@ public class Level : Scene {
 
         EnemyPov();
         updateDiscovered();
+        CheckWinCondition();
 
         // check for player death -- show GAME OVER screen and end level
         if (_player.Hp <= 0)
@@ -368,7 +371,7 @@ public class Level : Scene {
    
    // PROMPT: I need a way to implement a Message buffer that doesn't cause Buffer corruption
    private readonly Queue<string> _messages = new();
-   private const int MaxMessages = 8;
+   private const int MaxMessages = 3;
    private void PushMessage(string message)
    {
        if (string.IsNullOrWhiteSpace(message)) return;
@@ -393,6 +396,27 @@ public class Level : Scene {
    
    
    private string _lastPlayerCombatMessage = "";
+   // Helper method to check if the player has explored the entire map
+   private bool HasExploredEntireMap()
+   {
+       var discoverable = _floor
+           .Union(_tunnel)
+           .Union(_door)
+           .Union(_decor)
+           .ToHashSet();
+
+       return _discovered is not null && _discovered.IsSupersetOf(discoverable);
+   }
+   // Helper method to check for a win condition
+   private void CheckWinCondition()
+   {
+       if (_enemies.Count == 0 && HasExploredEntireMap())
+       {
+           isWinner = true;
+           QuitLevel();
+       }
+   }
+   
    public void MovePlayer(Vector2 delta) {
         var newPos = _player!.Pos + delta;
         var enemy = _enemies.FirstOrDefault(e => e.Pos == newPos && e.Hp > 0);
@@ -412,12 +436,7 @@ public class Level : Scene {
                 _enemies.Remove(enemy);
                 PushMessage($"{enemy.EnemyType} is defeated.");
             }
-
-            if (_enemies.Count == 0)
-            {
-                isWinner = true;
-                QuitLevel();
-            }
+            CheckWinCondition();
             return;
         }
 
