@@ -6,8 +6,7 @@ namespace RogueLib.Items;
 public class DamagePotion : Potion
 {
     public DamagePotion(Vector2 pos) : base(pos, ConsoleColor.Blue) { }
-
-    private static Random rng = new Random();
+    
 
     public override void Drink(Player player)
     {

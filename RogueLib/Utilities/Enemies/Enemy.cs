@@ -44,7 +44,7 @@ public abstract class Enemy : IActor, IDrawable
         return player.TakeDamage(Math.Max(1, damage));
     }
 
-    public int TakeDamage(int damage)
+    public virtual int TakeDamage(int damage)
     {
         int damageTaken = Math.Max(0, damage - _arm);
         _hp -= damageTaken;
@@ -54,10 +54,10 @@ public abstract class Enemy : IActor, IDrawable
     
 
     // PROMPT : Show me a code where Enemies does only walks on walkable tiles
-    public void Chase(Player player) => Chase(player, pos => true);
+    public virtual void Chase(Player player) => Chase(player, pos => true);
 
     // PROMPT: Show me a good way to stop enemies from running away instead of chasing
-    public void Chase(Player player, Func<Vector2, bool> canMove)
+    public virtual void Chase(Player player, Func<Vector2, bool> canMove)
     {
         var dx = Math.Sign(player.Pos.X - Pos.X);
         var dy = Math.Sign(player.Pos.Y - Pos.Y);

@@ -30,8 +30,8 @@ public abstract class Player : IActor, IDrawable {
 
    public int Hp { get => _hp; }
    public int MaxHp { get => _maxHp; }
-   private Weapon? _equippedWeapon;
-   private Armour? _equippedArmour;
+   protected Weapon? _equippedWeapon;
+   protected Armour? _equippedArmour;
    
    // Properties for updating the HUD
    public string EquippedWeaponName => _equippedWeapon?.Name ?? "None";
@@ -69,7 +69,9 @@ public abstract class Player : IActor, IDrawable {
          _equippedWeapon = weapons.FirstOrDefault();
          return _equippedWeapon is not null;
       }
-
+      
+      // Increments the current equipped weapon, then if it hits the last index
+      // then resets to 0 through the modulo
       var idx = weapons.IndexOf(_equippedWeapon);
       _equippedWeapon = weapons[(idx + 1) % weapons.Count];
       return true;
@@ -90,7 +92,8 @@ public abstract class Player : IActor, IDrawable {
          _equippedArmour = armours.FirstOrDefault();
          return _equippedArmour is not null;
       }
-      
+      // Increments the current armour weapon, then if it hits the last index
+      // then resets to 0 through the modulo
       var idx = armours.IndexOf(_equippedArmour);
       _equippedArmour = armours[(idx + 1) % armours.Count];
       return true;
@@ -172,7 +175,7 @@ public abstract class Player : IActor, IDrawable {
         return enemy.TakeDamage(Math.Max(1, damage));
     }
 
-    public void AddExp(int amount)
+    public virtual void AddExp(int amount)
     {
         _exp += amount;
         // level up while we have enough exp
@@ -192,7 +195,7 @@ public abstract class Player : IActor, IDrawable {
     
     
 
-    public int TakeDamage(int damage)
+    public virtual int TakeDamage(int damage)
     {
         int damageTaken = Math.Max(0, damage - Arm);
         _hp -= damageTaken;

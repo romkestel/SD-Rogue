@@ -1,6 +1,7 @@
 ﻿using RogueLib.Dungeon;
 using RogueLib.Utilities;
 
+// Using enum (int) values for armour
 public enum ArmourType
 {
     LeatherArmour = 1,

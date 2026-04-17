@@ -11,7 +11,7 @@ public class HealthPotion : Potion
     
     public override void Drink(Player player)
     {
-        int healAmount = rng.Next(1, (player.Hp / 2 + 1));
+        int healAmount = rng.Next(1, (player.Hp / 6 + 1));
         player.Heal(healAmount);
     }
 

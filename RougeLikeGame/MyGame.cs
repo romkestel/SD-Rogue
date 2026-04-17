@@ -13,7 +13,7 @@ public class MyGame : Game {
       // 'inject' an IRenderWindow to draw the game one
       // 'inject' a Player, the player lives outside or the Scene's because the 
       // player visits all the scenes and takes their inventory with them. 
-      // you must load the first leveel, and your level or your game must manage 
+      // you must load the first level, and your level or your game must manage 
       // the level switching. 
       
       _window       = new ScreenBuff();

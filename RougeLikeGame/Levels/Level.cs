@@ -141,7 +141,6 @@ public class Level : Scene {
       => Vector2.getAllTiles().Where(t => (pos - t).RookLength < sens).ToHashSet();
 
     // -----------------------------------------------------------------------
-
     
     public void EnemyPov() // -- TEAM
     {
@@ -203,7 +202,7 @@ public class Level : Scene {
 
     public static bool isWinner = false;
     public override void Update() {
-      _player!.Update();
+        _player!.Update();
 
         EnemyPov();
         updateDiscovered();
@@ -380,7 +379,7 @@ public class Level : Scene {
            _messages.Dequeue();
        }
    }
-
+    // ALSO RETURNED FROM THE ABOVE PROMPT
    private static string ItemLabel(Item item)
    {
        return item switch
@@ -395,7 +394,7 @@ public class Level : Scene {
    
    private string _lastPlayerCombatMessage = "";
    public void MovePlayer(Vector2 delta) {
-      var newPos = _player!.Pos + delta;
+        var newPos = _player!.Pos + delta;
         var enemy = _enemies.FirstOrDefault(e => e.Pos == newPos && e.Hp > 0);
         if (enemy != null)
         {
@@ -466,7 +465,4 @@ public class Level : Scene {
     public void QuitLevel() {
       _levelActive = false;
    }
-
-
-
 }
