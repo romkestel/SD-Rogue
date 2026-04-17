@@ -94,18 +94,18 @@ public class Level : Scene {
             _items.Add(new Armour(tile, rng));
         }
 
-        for (int i = 0; i < hPotion; i++)
-        {
-            var tile = _floor.ElementAt(rng.Next(_floor.Count));
-            _items.Add(new HealthPotion(tile));
-        }
+            for (int i = 0; i < hPotion; i++)
+            {
+               var tile = _floor.ElementAt(rng.Next(_floor.Count));
+               _items.Add(new HealthPotion(tile));
+            }
 
-        for (int i = 0; i < strPotion; i++)
-        {
-            var tile = _floor.ElementAt(rng.Next(_floor.Count));
-            _items.Add(new DamagePotion(tile));
-        }
-    }
+            for (int i = 0; i < strPotion; i++)
+            {
+               var tile = _floor.ElementAt(rng.Next(_floor.Count));
+               _items.Add(new DamagePotion(tile));
+            }
+      }
 
         // Spawns Enemies
         void SpawnEnemy()
@@ -131,7 +131,7 @@ public class Level : Scene {
                 _enemies.Add(new Troll(tile));
             }
         }
-    }
+    
 
     protected void updateDiscovered() {
       _inFov = fovCalc(_player!.Pos, _senseRadius);
