@@ -4,9 +4,9 @@ using RogueLib.Utilities;
 public enum ArmourType
 {
     LeatherArmour = 1,
-    SteelArmour,
-    PlateArmour,
-    MithrilArmour,
+    SteelArmour = 4,
+    PlateArmour = 3,
+    MithrilArmour = 7,
 }
 
 namespace RogueLib.Items
@@ -15,7 +15,6 @@ namespace RogueLib.Items
     public class Armour : Item, IEquatable<Armour>
     {
         public int Defense => (int)Type;
-
         public string Name => Type.ToString();
         
         public ArmourType Type { get; }
@@ -42,6 +41,5 @@ namespace RogueLib.Items
    
         public override int GetHashCode()
             => Type.GetHashCode();
-
     }
 }

@@ -149,9 +149,17 @@ public class Level : Scene {
             // I need a method for the enemy to chase the player when
             // within enemy radius BUT it needs to only chase the
             // player WITHIN walkable tiles
-            var enemyFov = (e.Pos - _player.Pos).KingLength; //fovCalc(e.Pos, _senseRadius);
-
-            if (enemyFov <= 3) // enemy field vision to chase
+            
+            var dist = (e.Pos - _player.Pos).KingLength;
+            
+            //If adjacent, attack instead of moving.
+            if (dist == 1)
+            {
+                e.Attack(_player);
+                continue;
+            }
+            
+            if (dist <= 3) // enemy field vision to chase
             {
                 // pass a predicate so the enemy only moves onto walkable, unoccupied tiles
                 e.Chase(_player, pos => _walkables.Contains(pos) && !IsTileOccupied(pos));
@@ -326,17 +334,17 @@ public class Level : Scene {
    
    public void MovePlayer(Vector2 delta) {
       var newPos = _player!.Pos + delta;
-        var enemy = _enemies.FirstOrDefault(e => e.Pos == newPos && e._hp > 0);
+        var enemy = _enemies.FirstOrDefault(e => e.Pos == newPos && e.Hp > 0);
         if (enemy != null)
         {
             _player.Attack(enemy);
 
             // only let the enemy attack back if it's still alive
-            if (enemy._hp > 0)
+            if (enemy.Hp > 0)
                 enemy.Attack(_player);
 
             // if enemy died from the player's attack, give exp and remove
-            if (enemy._hp <= 0)
+            if (enemy.Hp <= 0)
             {
                 _player.AddExp(enemy.ExpValue);
                 _enemies.Remove(enemy);
@@ -367,9 +375,6 @@ public class Level : Scene {
 
             var oldPos = _player!.Pos;
             _player!.Pos = newPos;
-            //_walkables.Remove(newPos); // new tile is now occupied
-            //_walkables.Add(oldPos);    // old tile is now free
-                        
         } 
    }
 
@@ -380,7 +385,7 @@ public class Level : Scene {
         if (_player.Pos == pos)
             return true;
 
-        return _enemies.Any(e => e.Pos == pos && e._hp > 0);
+        return _enemies.Any(e => e.Pos == pos && e.Hp > 0);
     }
 
     //public void MoveEnemy(Vector2 delta)

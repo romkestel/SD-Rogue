@@ -12,10 +12,10 @@ public class Troll : Enemy
         _atk = dmge;
     }
 
-    public override void Attack(Player _player)
+    public override void Attack(Player? player)
     {
         Console.WriteLine("Troll SMASH!");
-        base.Attack(_player);
+        base.Attack(player);
     }
 
 

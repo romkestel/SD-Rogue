@@ -12,17 +12,19 @@ public abstract class Player : IActor, IDrawable {
 
    protected int _level  = 0;
    public int _hp     = 12;
-   protected int _str    = 16;
-   protected int _arm    = 4;
+   protected readonly int _str    = 16;
+   protected readonly int _arm    = 4;
    protected int _exp    = 0;
-   protected int _expToLevel = 10;
+   protected int _expToLevel = 50;
    protected int _gold   = 0;
    protected int _maxHp  = 12;
    protected int _maxStr = 16;
    protected int _turn   = 0;
+   protected int _strBonus = 0;
+   protected int _armBonus = 0;
    
-   public int Str => _str + (_equippedWeapon?.Damage ?? 0);
-   public int Arm => _arm + (_equippedArmour?.Defense ?? 0);
+   public int Str => _str + _strBonus + (_equippedWeapon?.Damage ?? 0);
+   public int Arm => _arm + _armBonus + (_equippedArmour?.Defense ?? 0);
 
    public Inventory Inventory { get; } = new();
 
@@ -119,10 +121,13 @@ public abstract class Player : IActor, IDrawable {
 
    public void BuffDamage(int amount)
    {
-      _str += amount;
-      if (_str > _maxStr)
+      if (amount <= 0) return;
+      _strBonus += amount;
+
+      int maxBonus = Math.Max(0, _maxStr - _str);
+      if (_strBonus > maxBonus)
       {
-         _str = _maxStr;
+         _strBonus = maxBonus;
       }
    }
    
@@ -144,22 +149,25 @@ public abstract class Player : IActor, IDrawable {
    }
       
    
-    public void Attack(Enemy enemy)
+    public virtual void Attack(Enemy? enemy)
     {
-        // Base damage is 1 when unarmed. If a weapon is equipped use its Damage
-        int baseDamage = 1;
-        double multiplier = 1.0;
+        if (enemy is null) return;
 
-        if (_equippedWeapon is not null)
+        int toHit = Dice.Roll(20);
+        if (toHit <= 4) return; // missed attack
+        
+        // Weapon enum value is base damage; unarmed fallback
+        int weaponBase = _equippedWeapon?.Damage ?? 2;
+        
+        // Damage uses dice + STR scaling
+        int damage = Dice.Roll(1, weaponBase) + Math.Max(1, Str / 5);
+         
+        // Crit only when 20 is rolled
+        if (toHit == 20)
         {
-            baseDamage = _equippedWeapon.Damage;
-            multiplier = 1.0 + 0.1 * Math.Max(0, _equippedWeapon.Level - 1);
+           damage += Dice.Roll(1, weaponBase);
         }
-
-        var raw = baseDamage * multiplier;
-        int damage = Math.Max(1, (int)Math.Ceiling(raw));
-
-        enemy.TakeDamage(damage);
+        enemy.TakeDamage(Math.Max(1, damage));
     }
 
     public void AddExp(int amount)
@@ -176,18 +184,15 @@ public abstract class Player : IActor, IDrawable {
             // reset HP to full on level up
             _hp = _maxHp;
             _maxStr++;
-            _str++;
+            if (_level % 2 == 0) _strBonus++;
         }
     }
-    // Increase defense depending on armour type
-    public void ItemEquipped(Weapon weaponType, Armour armourType)
-    {
-        _arm += armourType.Defense;
-    }
+    
+    
 
     public void TakeDamage(int damage)
     {
-        int damageTaken = Math.Max(0, damage - _arm);
+        int damageTaken = Math.Max(0, damage - Arm);
         _hp -= damageTaken;
     }
 

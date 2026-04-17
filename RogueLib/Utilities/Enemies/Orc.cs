@@ -12,10 +12,10 @@ public class Orc : Enemy
         _atk = damage;
     }
 
-    public override void Attack(Player _player)
+    public override void Attack(Player? player)
     {
         Console.WriteLine("Orc swings a big Club!");
-        base.Attack(_player);
+        base.Attack(player);
     }
 
 

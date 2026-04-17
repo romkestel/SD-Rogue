@@ -12,13 +12,16 @@ public abstract class Enemy : IActor, IDrawable
     public ConsoleColor _color = ConsoleColor.Red;
         
     protected int _level = 1;
-    public int _hp = 5;
-    public int _atk = 4;
-    protected int _arm = 1;
+    protected int _hp = 7;
+    protected int _atk = 4;
+    protected int _arm = 2;
     protected int _expvalue = 10;
     public int ExpValue => _expvalue;
     protected int _turn = 0;
-    
+    public int Hp => _hp;
+    public int Atk => _atk;
+    public int Arm => _arm;
+    public bool IsDead => _hp <= 0;
     
     
     public Enemy(char glyph, Vector2 pos)
@@ -27,11 +30,17 @@ public abstract class Enemy : IActor, IDrawable
         Pos = pos;
     }
         
-    public virtual void Attack(Player player)
+    public virtual void Attack(Player? player)
     {
-        // Default attack behaviour: deal this enemy's attack value to the player.
-        // Player.TakeDamage will account for the player's armour.
-        player.TakeDamage(_atk);
+        if (player is null) return;
+        
+        // d20 hit roll
+        int toHit = Dice.Roll(20);
+        if (toHit <= 4) return;
+        
+        // damage roll
+        int damage = Dice.Roll(1, Math.Max(1, _atk));
+        player.TakeDamage(Math.Max(1, damage));
     }
 
     public void TakeDamage(int damage)
@@ -61,12 +70,14 @@ public abstract class Enemy : IActor, IDrawable
     public void Chase(Player player) => Chase(player, pos => true);
 
     // New: only move when canMove returns true (use Level to pass walkable + occupancy checks)
-    public void Chase(Player player, Func<Vector2, bool> canMove)
+    public virtual void Chase(Player player, Func<Vector2, bool> canMove)
     {
         // Basic greedy step towards player with checks
         var dx = Math.Sign(player.Pos.X - Pos.X);
         var dy = Math.Sign(player.Pos.Y - Pos.Y);
 
+        var currentStep = (player.Pos - Pos);
+        
         // Try horizontal step first
         if (dx != 0)
         {

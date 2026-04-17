@@ -12,10 +12,10 @@ public class Goblin : Enemy
         _atk = damage;
     }
 
-    public override void Attack(Player _player)
+    public override void Attack(Player? player)
     {
         Console.WriteLine("Goblin attacks!");
-        base.Attack(_player);
+        base.Attack(player);
     }
     
 
