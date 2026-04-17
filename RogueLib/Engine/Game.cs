@@ -50,13 +50,9 @@ public class Game {
       }
    }
 
-
    protected virtual void HandleUserInput() {
       ConsoleKeyInfo key = Console.ReadKey(true);
       if (_currentLevel!.HasCommand(key.Key))
          _currentLevel!.DoCommand(new Command(_currentLevel!.GetCommand(key.Key)));
    }
-
-
-    
 }

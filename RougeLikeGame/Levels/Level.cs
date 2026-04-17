@@ -168,6 +168,7 @@ public class Level : Scene {
         updateDiscovered();
     }
 
+    public static bool isWinner = false;
     public override void Update() {
       _player!.Update();
 
@@ -177,24 +178,8 @@ public class Level : Scene {
         // check for player death -- show GAME OVER screen and end level
         if (_player.Hp <= 0)
         {
-            // Clear the console and show a simple GAME OVER screen
-            Console.Clear();
-            var msg = "GAME OVER";
-            var sub = "Press any key to exit";
-            int cx = Math.Max(0, (Game.width - msg.Length) / 2);
-            int cy = Math.Max(0, Game.height / 2);
-            try { Console.SetCursorPosition(cx, cy); } catch { }
-            var prev = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(msg);
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine();
-            Console.WriteLine(sub);
-            Console.ForegroundColor = prev;
-            Console.ReadKey(true);
-
             _levelActive = false;
-            return;
+            isWinner = false;
         }
         // foreach item update
         // foreach NPC update 
