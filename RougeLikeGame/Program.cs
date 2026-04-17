@@ -78,8 +78,8 @@ class Program {
             AnsiConsole.MarkupLine("\n\n[green]Press any button to start your adventure[/]");
             Console.ReadLine();
 
-
-
+            Level.isWinner = false;
+            
             Console.Clear();
             Game game = new MyGame();
             game.run();

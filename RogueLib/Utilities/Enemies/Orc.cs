@@ -7,15 +7,18 @@ namespace RogueLib.Utilities.Enemies;
 
 public class Orc : Enemy
 {
-    public Orc(Vector2 pos, int damage) : base('O', pos)
+    public Orc(Vector2 pos) : base('O', pos)
     {
-        _atk = damage;
+        _hp = 10;
+        _atk = 6;
+        _expvalue = 12;
     }
 
-    public override void Attack(Player? player)
+    
+    
+    public override int Attack(Player? player)
     {
-        Console.WriteLine("Orc swings a big Club!");
-        base.Attack(player);
+        return base.Attack(player);
     }
 
 

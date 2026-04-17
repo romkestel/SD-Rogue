@@ -22,7 +22,8 @@ public abstract class Enemy : IActor, IDrawable
     public int Atk => _atk;
     public int Arm => _arm;
     public bool IsDead => _hp <= 0;
-    
+
+    public string EnemyType => GetType().Name;
     
     public Enemy(char glyph, Vector2 pos)
     {        
@@ -30,106 +31,63 @@ public abstract class Enemy : IActor, IDrawable
         Pos = pos;
     }
         
-    public virtual void Attack(Player? player)
+    public virtual int Attack(Player? player)
     {
-        if (player is null) return;
+        if (player is null) return -1;
         
-        // d20 hit roll
+        // d20 dice roll for hit/miss chance
         int toHit = Dice.Roll(20);
-        if (toHit <= 4) return;
+        if (toHit <= 6) return -1; // miss
         
-        // damage roll
-        int damage = Dice.Roll(1, Math.Max(1, _atk));
-        player.TakeDamage(Math.Max(1, damage));
+        // d_ dice roll depending on enemy _atk amount
+        int damage = Dice.Roll(1, Math.Max(1, _atk)) + Math.Max(1, _atk / 3);
+        return player.TakeDamage(Math.Max(1, damage));
     }
 
-    public void TakeDamage(int damage)
+    public int TakeDamage(int damage)
     {
         int damageTaken = Math.Max(0, damage - _arm);
         _hp -= damageTaken;
+        return damageTaken;
     }
 
-    //// intellicense
-    //public void Chase(Player player)
-    //{
-    //    // Simple chasing logic: move towards the player
-    //    if (player.Pos.X < (Pos.X+1))
-    //        Pos.X--;
-
-    //    if (player.Pos.X > (Pos.X-1))
-    //        Pos.X++;
-
-    //    if (player.Pos.Y < (Pos.Y+1))
-    //        Pos.Y--;
-
-    //    if (player.Pos.Y > (Pos.Y-1))
-    //        Pos.Y++;
-    //}
+    
 
     // PROMPT : Show me a code where Enemies does only walks on walkable tiles
     public void Chase(Player player) => Chase(player, pos => true);
 
-    // New: only move when canMove returns true (use Level to pass walkable + occupancy checks)
-    public virtual void Chase(Player player, Func<Vector2, bool> canMove)
+    // PROMPT: Show me a good way to stop enemies from running away instead of chasing
+    public void Chase(Player player, Func<Vector2, bool> canMove)
     {
-        // Basic greedy step towards player with checks
         var dx = Math.Sign(player.Pos.X - Pos.X);
         var dy = Math.Sign(player.Pos.Y - Pos.Y);
-
-        var currentStep = (player.Pos - Pos);
         
-        // Try horizontal step first
-        if (dx != 0)
+        // uses KingLength for square range
+        var currentDist = (player.Pos - Pos).KingLength;
+
+        var candidates = new[]
         {
-            var candidate = new Vector2(Pos.X + dx, Pos.Y);
-            if (canMove(candidate))
+            new Vector2(Pos.X + dx, Pos.Y),         // horizontal
+            new Vector2(Pos.X, Pos.Y + dy),         // vertical
+            new Vector2(Pos.X + dx, Pos.Y + dy)     // diagonal
+        };
+
+        foreach (var c in candidates)
+        {
+            if (c == Pos) continue;
+            if (!canMove(c)) continue;
+
+            var newDist = (player.Pos - c).KingLength;
+            if (newDist < currentDist)
             {
-                Pos = candidate;
+                Pos = c;
                 return;
-            }
-        }
-        // Try vertical step
-        if (dy != 0)
-        {
-            var candidate = new Vector2(Pos.X, Pos.Y + dy);
-            if (canMove(candidate))
-            {
-                Pos = candidate;
-                return;
-            }
-        }
-        // Try diagonal
-        if (dx != 0 && dy != 0)
-        {
-            var candidate = new Vector2(Pos.X + dx, Pos.Y + dy);
-            if (canMove(candidate))
-            {
-                Pos = candidate;
-                return;
-            }
-        }
-        // Fallback: try any adjacent cardinal tile
-        var neighbors = new[]
-        {
-        new Vector2(Pos.X + 1, Pos.Y),
-        new Vector2(Pos.X - 1, Pos.Y),
-        new Vector2(Pos.X, Pos.Y + 1),
-        new Vector2(Pos.X, Pos.Y - 1)
-    };
-        foreach (var n in neighbors)
-        {
-            if (canMove(n))
-            {
-                Pos = n;
-                return;
-            }
+            } 
         }
 
-        // If none available, stay in place
+        // no valid closer tile -> stay in place
     }
-
-
-
+    
 
     public virtual void Draw(IRenderWindow disp)
     {

@@ -74,6 +74,9 @@ public abstract class Player : IActor, IDrawable {
       _equippedWeapon = weapons[(idx + 1) % weapons.Count];
       return true;
    }
+   
+   
+   
 
    // Will be used in Level so the player can cycle through their
    // looted armour to change their _currentArmour using a Keybind
@@ -92,6 +95,9 @@ public abstract class Player : IActor, IDrawable {
       _equippedArmour = armours[(idx + 1) % armours.Count];
       return true;
    }
+   
+   
+   
 
    // Drinks the first potion in the players inventory then disposes of it
    public bool DrinkFirstPotion()
@@ -138,23 +144,18 @@ public abstract class Player : IActor, IDrawable {
       Pos  = Vector2.Zero;
    }
 
-   public string HUD 
-   {
-      get
-      {
-         var line1 = $"Level:{_level}  Gold:{_gold}  Hp:{_hp}({_maxHp})  Str:{Str}  Arm:{Arm}  Exp:{_exp}/{_expToLevel}  Turn:{_turn}".PadRight(78);
-         var line2 = $"Wpn: {EquippedWeaponName} ({EquippedWeaponDamage})   Arm: {EquippedArmourName} ({EquippedArmourDefense})".PadRight(78); 
-         return line1 + "\r\n" + line2;
-      }
-   }
+   public string HUD => $"Level:{_level}  Gold:{_gold}  Hp:{_hp}({_maxHp})  Str:{Str}" +
+                        $"  Arm:{Arm}  XP:{_exp}/{_expToLevel}  T:{_turn}  ".PadRight(78);
       
    
-    public virtual void Attack(Enemy? enemy)
+      
+   
+    public virtual int Attack(Enemy? enemy)
     {
-        if (enemy is null) return;
+        if (enemy is null) return -1;
 
         int toHit = Dice.Roll(20);
-        if (toHit <= 4) return; // missed attack
+        if (toHit <= 3) return -1; // missed attack
         
         // Weapon enum value is base damage; unarmed fallback
         int weaponBase = _equippedWeapon?.Damage ?? 2;
@@ -167,7 +168,8 @@ public abstract class Player : IActor, IDrawable {
         {
            damage += Dice.Roll(1, weaponBase);
         }
-        enemy.TakeDamage(Math.Max(1, damage));
+        
+        return enemy.TakeDamage(Math.Max(1, damage));
     }
 
     public void AddExp(int amount)
@@ -190,14 +192,14 @@ public abstract class Player : IActor, IDrawable {
     
     
 
-    public void TakeDamage(int damage)
+    public int TakeDamage(int damage)
     {
         int damageTaken = Math.Max(0, damage - Arm);
         _hp -= damageTaken;
+        return damageTaken;
     }
 
     public virtual void Update() {
-       
       _turn++;
     }
 

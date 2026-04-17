@@ -7,15 +7,16 @@ namespace RogueLib.Utilities.Enemies;
 
 public class Goblin : Enemy
 {
-    public Goblin(Vector2 pos, int damage) : base('G', pos)
+    public Goblin(Vector2 pos) : base('G', pos)
     {
-        _atk = damage;
+        _hp = 6;
+        _atk = 4;
+        _expvalue = 8;
     }
 
-    public override void Attack(Player? player)
+    public override int Attack(Player? player)
     {
-        Console.WriteLine("Goblin attacks!");
-        base.Attack(player);
+        return base.Attack(player);
     }
     
 

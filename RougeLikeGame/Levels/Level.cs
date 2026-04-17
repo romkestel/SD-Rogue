@@ -25,7 +25,7 @@ namespace SandBox01.Levels;
 public class Level : Scene {
    // ---- level config ---- 
    protected string? _map;
-   protected int     _senseRadius = 400;
+   protected int     _senseRadius = 8;
    
    // --- Tile Sets -----
    // used to keep track of state of tiles on the map
@@ -40,7 +40,7 @@ public class Level : Scene {
 
    protected List<Item> _items;
    protected List<Enemy> _enemies;
-    
+   
    
    public Level(Player p, string map, Game game) {
       if (game == null || p == null || map == null)
@@ -52,11 +52,13 @@ public class Level : Scene {
       _game       = game; // _game
       _items      = new List<Item>(); // type of item
       _enemies   = new List<Enemy>();
+      
+      
 
         initMapTileSets(map);
         updateDiscovered();
         registerCommandsWithScene();
-        SpawnEnemey();
+        SpawnEnemy();
         SpreadItem();
 
         // Spawns Items
@@ -65,10 +67,10 @@ public class Level : Scene {
          var rng = new Random();
          var am = rng.Next(10, 20);
          
-         var wep = rng.Next(0, 3);
-         var armour = rng.Next(0, 2);
-         var hPotion = rng.Next(0, 2);
-         var strPotion = rng.Next(0, 2);
+         var wep = rng.Next(1, 3);
+         var armour = rng.Next(1, 3);
+         var hPotion = rng.Next(1, 3);
+         var strPotion = rng.Next(0, 1);
          
 
             for (int i = 0; i < am; i++)
@@ -103,26 +105,25 @@ public class Level : Scene {
       }
 
         // Spawns Enemies
-        void SpawnEnemey()
+        void SpawnEnemy()
         {
             var rng = new Random();
-            var am = rng.Next(10, 20);
-            var enemy = rng.Next(1, 3);
+            var enemy = rng.Next(1, 4);
 
             for (int i = 0; i < enemy; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
-                _enemies.Add(new Goblin (tile, 5));
+                _enemies.Add(new Goblin (tile));
             }
             for (int i = 0; i < enemy; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
-                _enemies.Add(new Orc(tile, 10));
+                _enemies.Add(new Orc(tile));
             }
             for (int i = 0; i < enemy; i++)
             {
                 var tile = _floor.ElementAt(rng.Next(_floor.Count));
-                _enemies.Add(new Troll(tile, 15));
+                _enemies.Add(new Troll(tile));
             }
         }
    }
@@ -141,10 +142,13 @@ public class Level : Scene {
 
     // -----------------------------------------------------------------------
 
-
+    
     public void EnemyPov() // -- TEAM
     {
-        foreach (var e in _enemies)
+        int hitCount = 0;
+        int missCount = 0;
+        int totalDamage = 0;
+        foreach (var e in _enemies.ToList())
         {
             // I need a method for the enemy to chase the player when
             // within enemy radius BUT it needs to only chase the
@@ -155,7 +159,17 @@ public class Level : Scene {
             //If adjacent, attack instead of moving.
             if (dist == 1)
             {
-                e.Attack(_player);
+
+                int enemyDmg = e.Attack(_player);
+                if (enemyDmg < 0)
+                {
+                    missCount++;
+                }
+                else
+                {
+                    hitCount++;
+                    totalDamage += enemyDmg;
+                }
                 continue;
             }
             
@@ -163,7 +177,26 @@ public class Level : Scene {
             {
                 // pass a predicate so the enemy only moves onto walkable, unoccupied tiles
                 e.Chase(_player, pos => _walkables.Contains(pos) && !IsTileOccupied(pos));
+            } 
+            else
+            {
+                // random wander step
+                var dirs = new[] { Vector2.N, Vector2.S, Vector2.E, Vector2.W };
+                var step = dirs[Random.Shared.Next(dirs.Length)];
+                var target = e.Pos + step;
+
+                if (_walkables.Contains(target) && !IsTileOccupied(target))
+                    e.Pos = target;
             }
+        }
+        // Single message for whole enemy phase
+        if (hitCount > 0)
+        {
+            PushMessage($"Enemies hit you {hitCount}x for {totalDamage}.");
+        }
+        else if (missCount > 0)
+        {
+            PushMessage($"Enemies missed {missCount}x.");
         }
         updateDiscovered();
     }
@@ -197,12 +230,26 @@ public class Level : Scene {
 
       disp.fDraw(tilesToDraw, _map, ConsoleColor.Gray);
       
-      // disp.Draw(_player!.Glyph, _player!.Pos, ConsoleColor.Cyan);
-
       drawItems(disp);
       drawEnemies(disp);
       _player!.Draw(disp);
-      disp.Draw(_player.HUD, new Vector2(0, 23), ConsoleColor.Green);
+      disp.Draw(_player.HUD, new Vector2(0, 24), ConsoleColor.Green);
+      
+      // PROMPT: How to Display 2 MessageQueues on the same line
+      var enemyMsg = _messages.Count > 0 ? _messages.Last() : "";
+      var playerMsg = _lastPlayerCombatMessage;
+
+      string line;
+      if (string.IsNullOrWhiteSpace(enemyMsg))
+          line = playerMsg;
+      else if (string.IsNullOrWhiteSpace(playerMsg))
+          line = enemyMsg;
+      else
+          line = $"{enemyMsg} | {playerMsg}";
+
+      disp.Draw(line.PadRight(78), new Vector2(0, 23), ConsoleColor.Yellow);
+
+      
    }
 
    public override void DoCommand(Command command) {
@@ -223,10 +270,14 @@ public class Level : Scene {
           _player!.DrinkFirstPotion();
       } else if (command.Name == "cycle-weapon")
       {
-          _player!.CycleWeapon();
+          PushMessage(_player!.CycleWeapon()
+              ? $"Equipped weapon: {_player.EquippedWeaponName} (+{_player.EquippedWeaponDamage})."
+              : "No weapons to equip.");
       } else if (command.Name == "cycle-armour")
       {
-          _player!.CycleArmour();
+          PushMessage(_player!.CycleArmour()
+              ? $"Equipped armour: {_player.EquippedArmourName} (+{_player.EquippedArmourDefense})."
+              : "No armour to equip.");
       }
    }
 
@@ -315,50 +366,89 @@ public class Level : Scene {
       
       RegisterCommand(ConsoleKey.Q, "quit");
    }
-
    
+   // PROMPT: I need a way to implement a Message buffer that doesn't cause Buffer corruption
+   private readonly Queue<string> _messages = new();
+   private const int MaxMessages = 8;
+   private void PushMessage(string message)
+   {
+       if (string.IsNullOrWhiteSpace(message)) return;
+
+       _messages.Enqueue(message);
+       while (_messages.Count > MaxMessages)
+       {
+           _messages.Dequeue();
+       }
+   }
+
+   private static string ItemLabel(Item item)
+   {
+       return item switch
+       {
+           Weapon w => w.Name,
+           Armour a => a.Name,
+           Gold => "Gold",
+           _ => item.GetType().Name
+       };
+   }
+   
+   
+   private string _lastPlayerCombatMessage = "";
    public void MovePlayer(Vector2 delta) {
       var newPos = _player!.Pos + delta;
         var enemy = _enemies.FirstOrDefault(e => e.Pos == newPos && e.Hp > 0);
         if (enemy != null)
         {
-            _player.Attack(enemy);
+            int playerDmg = _player.Attack(enemy);
+            _lastPlayerCombatMessage = playerDmg <= 0
+                ? $"You miss {enemy.EnemyType}."
+                : $"You hit {enemy.EnemyType} for {playerDmg}.";
+    
+            PushMessage(_lastPlayerCombatMessage);
 
-            // only let the enemy attack back if it's still alive
-            if (enemy.Hp > 0)
-                enemy.Attack(_player);
-
-            // if enemy died from the player's attack, give exp and remove
+            // If enemy died, reward, push message and end here. 
             if (enemy.Hp <= 0)
             {
                 _player.AddExp(enemy.ExpValue);
                 _enemies.Remove(enemy);
+                PushMessage($"{enemy.EnemyType} is defeated.");
             }
 
+            if (_enemies.Count == 0)
+            {
+                isWinner = true;
+                QuitLevel();
+            }
             return;
         }
 
-        if (_walkables.Contains(newPos)) {
+        if (_walkables.Contains(newPos))
+        {
             var itemToPickUp = _items.FirstOrDefault(i => i.Pos == newPos);
-            
+
             if (itemToPickUp != null)
             {
                 if (itemToPickUp is Gold g)
                 {
                     _player.AddGold(g.Amount);
                     _items.Remove(itemToPickUp);
+                    PushMessage($"You pick up {g.Amount} gold.");
                 }
                 else
                 {
                     if (_player.Inventory.AddItem(itemToPickUp))
                     {
-                        _player.TryAutoPickup(itemToPickUp);
+                        bool autoEquipped = _player.TryAutoPickup(itemToPickUp);
                         _items.Remove(itemToPickUp);
+
+                        PushMessage($"You pick up {ItemLabel(itemToPickUp)}.");
+
+                        if (autoEquipped)
+                            PushMessage($"{ItemLabel(itemToPickUp)} auto-equipped.");
                     }
                 }
             }
 
-            var oldPos = _player!.Pos;
             _player!.Pos = newPos;
         } 
    }
@@ -372,23 +462,6 @@ public class Level : Scene {
 
         return _enemies.Any(e => e.Pos == pos && e.Hp > 0);
     }
-
-    //public void MoveEnemy(Vector2 delta)
-    //{
-    //    var dy = delta.Y - _enemies.Pos.Y;
-
-    //    var newPos = _enemies!.Pos + delta;
-
-    //    // Move from MovePlayer Method
-    //    if (_walkables.Contains(newPos) || IsTileOccupied(newPos))
-    //    {
-    //        var oldPos = _enemies.Pos;
-    //        _enemies.Pos = newPos;
-         
-    //    }
-
-    //    updateDiscovered();
-    //}
 
     public void QuitLevel() {
       _levelActive = false;

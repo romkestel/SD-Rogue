@@ -7,15 +7,17 @@ namespace RogueLib.Utilities.Enemies;
 
 public class Troll : Enemy
 {
-    public Troll(Vector2 pos, int dmge) : base('T', pos)
+    
+    public Troll(Vector2 pos) : base('T', pos)
     {
-        _atk = dmge;
+        _atk = 8;
+        _hp = 14;
+        _expvalue = 18;
     }
 
-    public override void Attack(Player? player)
+    public override int Attack(Player? player)
     {
-        Console.WriteLine("Troll SMASH!");
-        base.Attack(player);
+        return base.Attack(player);
     }
 
 
